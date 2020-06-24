@@ -1,0 +1,3 @@
+rootProject.name='android_sample_uvccamera'
+include ':sample_uvc_camera'
+include ':sdk_uvc_camera'

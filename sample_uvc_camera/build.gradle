@@ -1,0 +1,76 @@
+apply plugin: rootProject.ext.plugins.application
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+    defaultConfig {
+        applicationId rootProject.ext.android.applicationId
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
+
+        ndk { abiFilters "armeabi-v7a", "arm64-v8a" }
+        testInstrumentationRunner rootProject.ext.dependencies.testInstrumentationRunner
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true
+            debuggable false
+            jniDebuggable false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+        warning 'InvalidPackage'
+        disable 'GoogleAppIndexingWarning'
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //Test
+    testImplementation rootProject.ext.dependencies.testJunit
+    androidTestImplementation rootProject.ext.dependencies.testExt
+    androidTestImplementation rootProject.ext.dependencies.testEspresso
+
+    //Jetpack
+    implementation rootProject.ext.dependencies.core
+    implementation rootProject.ext.dependencies.multidex
+    implementation rootProject.ext.dependencies.appcompat
+    implementation rootProject.ext.dependencies.annotations
+    implementation rootProject.ext.dependencies.constraint_layout
+    implementation rootProject.ext.dependencies.material
+
+    //内存泄漏监控
+    //debugImplementation rootProject.ext.dependencies.leakcanary
+
+    //UVCCamera
+    //implementation project(path: ':sdk_uvc_camera')
+    implementation(name: 'sdk_uvc_camera_v20061812_release', ext: 'aar')
+}
