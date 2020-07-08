@@ -4,7 +4,7 @@ import android.util.SparseArray;
 
 public class USBVendorId {
 
-	private static final SparseArray<String> IDS = new SparseArray<String>();
+	private static final SparseArray<String> IDS = new SparseArray<>();
 
 	public static String vendorName(final int vendor_id) {
 		return IDS.get(vendor_id);

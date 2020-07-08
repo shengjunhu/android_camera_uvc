@@ -13,18 +13,11 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Toast;
-
-import com.serenegiant.usb.IFrameCallback;
-import com.serenegiant.usb.Logger;
-import com.serenegiant.usb.USBMonitor;
-import com.serenegiant.usb.UVCCamera;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-
-import java.nio.ByteBuffer;
+import com.serenegiant.usb.USBMonitor;
+import com.serenegiant.usb.UVCCamera;
 
 /**
  * @Author:hsj
@@ -36,7 +29,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         Handler.Callback, USBMonitor.OnDeviceConnectListener {
 
     private static final String TAG = "MainActivity";
-
+    //TODO Set your usb camera productId
     private static final int CAMERA_ID_RGB = 12384;
     private static final int RGB_PREVIEW_WIDTH = 640;
     private static final int RGB_PREVIEW_HEIGHT = 480;
@@ -86,7 +79,6 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         for (String permission : permissions) {
             if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 allGranted = false;
-                //弹窗申请
                 ActivityCompat.requestPermissions(this, permissions, 0x01);
             }
         }
@@ -165,7 +157,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
     @Override
     public void onAttach(UsbDevice device) {
         int productId = device.getProductId();
-        Logger.i(TAG, "Usb productId = " + productId);
+        Log.i(TAG, "Usb productId = " + productId);
         if (productId == CAMERA_ID_RGB) {
             Toast.makeText(this, "Usb device attach->" + productId, Toast.LENGTH_LONG).show();
             if (mUSBMonitor != null) {
@@ -179,11 +171,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         Toast.makeText(this, "Usb device connect", Toast.LENGTH_LONG).show();
         int productId = device.getProductId();
         if (productId == CAMERA_ID_RGB) {
-            Message msg = cameraHandler.obtainMessage(CAMERA_CREATE);
-            msg.what = CAMERA_CREATE;
-            msg.arg1 = productId;
-            msg.obj = block;
-            msg.sendToTarget();
+            cameraHandler.obtainMessage(CAMERA_CREATE,block).sendToTarget();
         }
     }
 
@@ -237,7 +225,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         try {
             rgbCamera = new UVCCamera();
             rgbCamera.open(blockRGB);
-            Logger.i(TAG, "rgb camera supported size = " + rgbCamera.getSupportedSize());
+            Log.i(TAG, "rgb camera supported size = " + rgbCamera.getSupportedSize());
             rgbCamera.setPreviewSize(RGB_PREVIEW_WIDTH, RGB_PREVIEW_HEIGHT,
                     UVCCamera.FRAME_FORMAT_MJPEG, 1.0f);
         } catch (Exception e) {
@@ -284,3 +272,4 @@ public final class MainActivity extends AppCompatActivity implements TextureView
     }
 
 }
+

@@ -72,10 +72,10 @@ UVCPreview::UVCPreview(uvc_device_handle_t *devh)
 	ENTER();
 	pthread_cond_init(&preview_sync, NULL);
 	pthread_mutex_init(&preview_mutex, NULL);
-//
+	//
 	pthread_cond_init(&capture_sync, NULL);
 	pthread_mutex_init(&capture_mutex, NULL);
-//	
+	//	
 	pthread_mutex_init(&pool_mutex, NULL);
 	EXIT();
 }
@@ -525,12 +525,13 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
 		LOGI("Streaming...");
 #endif
 		if (frameMode) {
-			// MJPEG mode
+			// MJPEG mode (Compressed)
 			for ( ; LIKELY(isRunning()) ; ) {
 				frame_mjpeg = waitPreviewFrame();
 				if (LIKELY(frame_mjpeg)) {
 					frame = get_frame(frame_mjpeg->width * frame_mjpeg->height * 2);
-					result = uvc_mjpeg2yuyv(frame_mjpeg, frame);   // MJPEG => yuyv
+					// MJPEG => yuyv （memery leak?  Decode, display stutter）
+					result = uvc_mjpeg2yuyv(frame_mjpeg, frame);   
 					recycle_frame(frame_mjpeg);
 					if (LIKELY(!result)) {
 						frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, 4);
@@ -541,7 +542,7 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
 				}
 			}
 		} else {
-			// yuvyv mode
+			// yuvyv mode (unCompressed)
 			for ( ; LIKELY(isRunning()) ; ) {
 				frame = waitPreviewFrame();
 				if (LIKELY(frame)) {
@@ -707,6 +708,9 @@ void UVCPreview::addCaptureFrame(uvc_frame_t *frame) {
 		}
 		captureQueu = frame;
 		pthread_cond_broadcast(&capture_sync);
+	}else{
+	    //Add By Hsj
+	    recycle_frame(frame);
 	}
 	pthread_mutex_unlock(&capture_mutex);
 }

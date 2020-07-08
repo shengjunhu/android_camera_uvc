@@ -29,8 +29,9 @@
 APP_PLATFORM := android-19
 #32位(armeabi armeabi-v7a x86 mips)
 #64位(arm64-v8a x86_64 mips64)
-APP_ABI := x86 x86_64 armeabi armeabi-v7a arm64-v8a
 #APP_ABI := all
+#APP_ABI := x86 x86_64 armeabi armeabi-v7a arm64-v8a
+APP_ABI :=  armeabi-v7a arm64-v8a
 #编译debug or release版本
-APP_OPTIM := release
 #APP_OPTIM := debug
+APP_OPTIM := release

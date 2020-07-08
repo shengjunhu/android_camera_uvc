@@ -27,7 +27,6 @@ import android.util.SparseArray;
 public final class USBMonitor {
 
     private static final String TAG = "USBMonitor";
-
     private static final String ACTION_USB_PERMISSION_BASE = "com.serenegiant.USB_PERMISSION.";
     private final String ACTION_USB_PERMISSION = ACTION_USB_PERMISSION_BASE + hashCode();
     public static final String ACTION_USB_DEVICE_ATTACHED = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
@@ -35,14 +34,14 @@ public final class USBMonitor {
     /**
      * openしているUsbControlBlock
      */
-    private final ConcurrentHashMap<UsbDevice, UsbControlBlock> mCtrlBlocks = new ConcurrentHashMap<UsbDevice, UsbControlBlock>();
-    private final SparseArray<WeakReference<UsbDevice>> mHasPermissions = new SparseArray<WeakReference<UsbDevice>>();
+    private final ConcurrentHashMap<UsbDevice, UsbControlBlock> mCtrlBlocks = new ConcurrentHashMap<>();
+    private final SparseArray<WeakReference<UsbDevice>> mHasPermissions = new SparseArray<>();
 
     private final WeakReference<Context> mWeakContext;
     private final UsbManager mUsbManager;
     private final OnDeviceConnectListener mOnDeviceConnectListener;
     private PendingIntent mPermissionIntent = null;
-    private List<DeviceFilter> mDeviceFilters = new ArrayList<DeviceFilter>();
+    private List<DeviceFilter> mDeviceFilters = new ArrayList<>();
 
     /**
      * コールバックをワーカースレッドで呼び出すためのハンドラー
@@ -95,8 +94,9 @@ public final class USBMonitor {
 
     public USBMonitor(final Context context, final OnDeviceConnectListener listener) {
         Logger.v(TAG, "USBMonitor:Constructor");
-        if (listener == null)
+        if (listener == null) {
             throw new IllegalArgumentException("OnDeviceConnectListener should not null.");
+        }
         mWeakContext = new WeakReference<Context>(context);
         mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         mOnDeviceConnectListener = listener;
@@ -115,7 +115,7 @@ public final class USBMonitor {
         if (!destroyed) {
             destroyed = true;
             // モニターしているUSB機器を全てcloseする
-            final Set<UsbDevice> keys = mCtrlBlocks.keySet();
+            Set<UsbDevice> keys = mCtrlBlocks.keySet();
             if (keys != null) {
                 UsbControlBlock ctrlBlock;
                 try {
@@ -1274,7 +1274,7 @@ public final class USBMonitor {
             checkConnection();
             SparseArray<UsbInterface> intfs = mInterfaces.get(interface_id);
             if (intfs == null) {
-                intfs = new SparseArray<UsbInterface>();
+                intfs = new SparseArray<>();
                 mInterfaces.put(interface_id, intfs);
             }
             UsbInterface intf = intfs.get(altsetting);
@@ -1282,7 +1282,7 @@ public final class USBMonitor {
                 final UsbDevice device = mWeakDevice.get();
                 final int n = device.getInterfaceCount();
                 for (int i = 0; i < n; i++) {
-                    final UsbInterface temp = device.getInterface(i);
+                    UsbInterface temp = device.getInterface(i);
                     if ((temp.getId() == interface_id) && (temp.getAlternateSetting() == altsetting)) {
                         intf = temp;
                         break;

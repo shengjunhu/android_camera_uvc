@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
  * @Class:Logger
  * @Description:日志工具类
  */
-public class Logger {
+final class Logger {
 
     //////////////////////////////////////////////////////////////
     // Logger 功能如下：
@@ -24,7 +24,7 @@ public class Logger {
     /**
      * 日志标签
      */
-    private static String TAG = "[Logger]";
+    private static String TAG = "[UVCCamera]";
 
     /**
      * 日志总开关
