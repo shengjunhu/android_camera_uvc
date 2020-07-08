@@ -709,7 +709,7 @@ void UVCPreview::addCaptureFrame(uvc_frame_t *frame) {
 		captureQueu = frame;
 		pthread_cond_broadcast(&capture_sync);
 	}else{
-	    //Add By Hsj
+	    //Add by shengjunhu
 	    recycle_frame(frame);
 	}
 	pthread_mutex_unlock(&capture_mutex);
