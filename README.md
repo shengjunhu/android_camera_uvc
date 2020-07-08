@@ -31,5 +31,5 @@ void UVCPreview::addCaptureFrame(uvc_frame_t *frame) {
 ### About License
 ```
 Copyright (c) 2020 shengjunhu
-Please compliance with the >UVCCamera license
+Please compliance with the UVCCamera license
 ```
