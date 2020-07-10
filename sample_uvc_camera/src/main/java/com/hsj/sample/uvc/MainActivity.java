@@ -31,6 +31,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
     private static final String TAG = "MainActivity";
     //TODO Set your usb camera productId
     private static final int CAMERA_ID_RGB = 12384;
+    //TODO Set your usb camera display width and height
     private static final int RGB_PREVIEW_WIDTH = 640;
     private static final int RGB_PREVIEW_HEIGHT = 480;
 
@@ -171,7 +172,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         Toast.makeText(this, "Usb device connect", Toast.LENGTH_LONG).show();
         int productId = device.getProductId();
         if (productId == CAMERA_ID_RGB) {
-            cameraHandler.obtainMessage(CAMERA_CREATE,block).sendToTarget();
+            cameraHandler.obtainMessage(CAMERA_CREATE, block).sendToTarget();
         }
     }
 
@@ -225,10 +226,10 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         try {
             rgbCamera = new UVCCamera();
             rgbCamera.open(blockRGB);
-            Log.i(TAG, "rgb camera supported size = " + rgbCamera.getSupportedSize());
+            Log.i(TAG, "rgb camera supported size=" + rgbCamera.getSupportedSize());
             rgbCamera.setPreviewSize(RGB_PREVIEW_WIDTH, RGB_PREVIEW_HEIGHT,
                     UVCCamera.FRAME_FORMAT_MJPEG, 1.0f);
-        } catch (Exception e) {
+        } catch (UnsupportedOperationException | IllegalArgumentException e) {
             e.printStackTrace();
         }
         Log.i(TAG, "rgb camera create time=" + (System.currentTimeMillis() - t));
@@ -242,8 +243,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
                 surface = new Surface(surfaceTexture);
                 rgbCamera.setPreviewDisplay(surface);
             }
-            rgbCamera.setFrameCallback(bb -> {
-            }, UVCCamera.PIXEL_FORMAT_RAW);
+            //rgbCamera.setFrameCallback(bb -> {}, UVCCamera.PIXEL_FORMAT_RAW);
             rgbCamera.startPreview();
         }
         Log.i(TAG, "rgb camera start time=" + (System.currentTimeMillis() - t));
@@ -272,4 +272,5 @@ public final class MainActivity extends AppCompatActivity implements TextureView
     }
 
 }
+
 

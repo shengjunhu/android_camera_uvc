@@ -1240,6 +1240,10 @@ int UVCCamera::updatePanLimit(int &min, int &max, int &def) {
 	int ret = UVC_ERROR_ACCESS;
 	if (mCtrlSupports & CTRL_PANTILT_ABS) {
 		update_ctrl_values(mDeviceHandle, mPan, mTilt, uvc_get_pantilt_abs);
+		//Add by shengjunhu for fix the getting Pan/Tilt Min/Max value
+		min = mPan.min;
+		max = mPan.max;
+		def = mPan.def;
 	}
 	RETURN(ret, int);
 }
@@ -1290,6 +1294,10 @@ int UVCCamera::updateTiltLimit(int &min, int &max, int &def) {
 	int ret = UVC_ERROR_ACCESS;
 	if (mCtrlSupports & CTRL_PANTILT_ABS) {
 		update_ctrl_values(mDeviceHandle, mPan, mTilt, uvc_get_pantilt_abs);
+		//Add by shengjunhu for fix the getting Pan/Tilt Min/Max value
+		min = mTilt.min;
+		max = mTilt.max;
+		def = mTilt.def;
 	}
 	RETURN(ret, int);
 }

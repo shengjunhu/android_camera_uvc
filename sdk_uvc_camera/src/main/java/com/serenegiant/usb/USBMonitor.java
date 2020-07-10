@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -41,7 +40,7 @@ public final class USBMonitor {
     private final UsbManager mUsbManager;
     private final OnDeviceConnectListener mOnDeviceConnectListener;
     private PendingIntent mPermissionIntent = null;
-    private List<DeviceFilter> mDeviceFilters = new ArrayList<>();
+    private List<DeviceFilter> mDeviceFilters = new ArrayList<DeviceFilter>();
 
     /**
      * コールバックをワーカースレッドで呼び出すためのハンドラー
@@ -100,7 +99,7 @@ public final class USBMonitor {
         mWeakContext = new WeakReference<Context>(context);
         mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         mOnDeviceConnectListener = listener;
-        mAsyncHandler = USBThreadHandler.createHandler(TAG);
+        mAsyncHandler = USBHandler.createHandler(TAG);
         destroyed = false;
         Logger.v(TAG, "USBMonitor:mUsbManager=" + mUsbManager);
     }
@@ -288,8 +287,10 @@ public final class USBMonitor {
      */
     public List<UsbDevice> getDeviceList(final List<DeviceFilter> filters) throws IllegalStateException {
         if (destroyed) throw new IllegalStateException("already destroyed");
-        final HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
-        final List<UsbDevice> result = new ArrayList<UsbDevice>();
+        //Add by shengjunhu for fix NullPointerException
+        //final HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
+        final HashMap<String, UsbDevice> deviceList = getDeviceList(mUsbManager);
+        final List<UsbDevice> result = new ArrayList<>();
         if (deviceList != null) {
             if ((filters == null) || filters.isEmpty()) {
                 result.addAll(deviceList.values());
@@ -331,6 +332,18 @@ public final class USBMonitor {
         return result;
     }
 
+    private static HashMap<String, UsbDevice> getDeviceList(UsbManager usbManager) {
+        HashMap<String, UsbDevice> list = null;
+        if (null != usbManager) {
+            try {
+                list = usbManager.getDeviceList();
+            } catch (Throwable e) {
+                Logger.w(TAG, e);
+            }
+        }
+        return list;
+    }
+
     /**
      * get USB device list, without filter
      *
@@ -350,7 +363,9 @@ public final class USBMonitor {
      * output device list to LogCat
      */
     public final void dumpDevices() {
-        final HashMap<String, UsbDevice> list = mUsbManager.getDeviceList();
+        //Add by shengjunhu for fix NullPointerException
+        //final HashMap<String, UsbDevice> list = mUsbManager.getDeviceList();
+        final HashMap<String, UsbDevice> list = getDeviceList(mUsbManager);
         if (list != null) {
             final Set<String> keys = list.keySet();
             if (keys != null && keys.size() > 0) {
@@ -918,42 +933,44 @@ public final class USBMonitor {
             }
             if ((manager != null) && manager.hasPermission(device)) {
                 final UsbDeviceConnection connection = manager.openDevice(device);
-                final byte[] desc = connection.getRawDescriptors();
+                if (connection!=null){//Add by shengjunhu
+                    final byte[] desc = connection.getRawDescriptors();
 
-                if (TextUtils.isEmpty(info.usb_version)) {
-                    info.usb_version = String.format("%x.%02x", ((int) desc[3] & 0xff), ((int) desc[2] & 0xff));
-                }
-                if (TextUtils.isEmpty(info.version)) {
-                    info.version = String.format("%x.%02x", ((int) desc[13] & 0xff), ((int) desc[12] & 0xff));
-                }
-                if (TextUtils.isEmpty(info.serial)) {
-                    info.serial = connection.getSerial();
-                }
+                    if (TextUtils.isEmpty(info.usb_version)) {
+                        info.usb_version = String.format("%x.%02x", ((int) desc[3] & 0xff), ((int) desc[2] & 0xff));
+                    }
+                    if (TextUtils.isEmpty(info.version)) {
+                        info.version = String.format("%x.%02x", ((int) desc[13] & 0xff), ((int) desc[12] & 0xff));
+                    }
+                    if (TextUtils.isEmpty(info.serial)) {
+                        info.serial = connection.getSerial();
+                    }
 
-                final byte[] languages = new byte[256];
-                int languageCount = 0;
-                // controlTransfer(int requestType, int request, int value, int index, byte[] buffer, int length, int timeout)
-                try {
-                    int result = connection.controlTransfer(
-                            USB_REQ_STANDARD_DEVICE_GET, // USB_DIR_IN | USB_TYPE_STANDARD | USB_RECIP_DEVICE
-                            USB_REQ_GET_DESCRIPTOR,
-                            (USB_DT_STRING << 8) | 0, 0, languages, 256, 0);
-                    if (result > 0) {
-                        languageCount = (result - 2) / 2;
+                    final byte[] languages = new byte[256];
+                    int languageCount = 0;
+                    // controlTransfer(int requestType, int request, int value, int index, byte[] buffer, int length, int timeout)
+                    try {
+                        int result = connection.controlTransfer(
+                                USB_REQ_STANDARD_DEVICE_GET, // USB_DIR_IN | USB_TYPE_STANDARD | USB_RECIP_DEVICE
+                                USB_REQ_GET_DESCRIPTOR,
+                                (USB_DT_STRING << 8) | 0, 0, languages, 256, 0);
+                        if (result > 0) {
+                            languageCount = (result - 2) / 2;
+                        }
+                        if (languageCount > 0) {
+                            if (TextUtils.isEmpty(info.manufacturer)) {
+                                info.manufacturer = getString(connection, desc[14], languageCount, languages);
+                            }
+                            if (TextUtils.isEmpty(info.product)) {
+                                info.product = getString(connection, desc[15], languageCount, languages);
+                            }
+                            if (TextUtils.isEmpty(info.serial)) {
+                                info.serial = getString(connection, desc[16], languageCount, languages);
+                            }
+                        }
+                    } finally {
+                        connection.close();
                     }
-                    if (languageCount > 0) {
-                        if (TextUtils.isEmpty(info.manufacturer)) {
-                            info.manufacturer = getString(connection, desc[14], languageCount, languages);
-                        }
-                        if (TextUtils.isEmpty(info.product)) {
-                            info.product = getString(connection, desc[15], languageCount, languages);
-                        }
-                        if (TextUtils.isEmpty(info.serial)) {
-                            info.serial = getString(connection, desc[16], languageCount, languages);
-                        }
-                    }
-                } finally {
-                    connection.close();
                 }
             }
             if (TextUtils.isEmpty(info.manufacturer)) {
@@ -1005,9 +1022,13 @@ public final class USBMonitor {
             mBusNum = busnum;
             mDevNum = devnum;
             if (mConnection != null) {
-                final int desc = mConnection.getFileDescriptor();
-                final byte[] rawDesc = mConnection.getRawDescriptors();
-                Logger.i(TAG, String.format(Locale.US, "name=%s,desc=%d,busnum=%d,devnum=%d,rawDesc=", name, desc, busnum, devnum) + rawDesc);
+                try {
+                    final int desc = mConnection.getFileDescriptor();
+                    final byte[] rawDesc = mConnection.getRawDescriptors();
+                    Logger.i(TAG, String.format(Locale.US, "name=%s,desc=%d,busnum=%d,devnum=%d,rawDesc=", name, desc, busnum, devnum) + rawDesc);
+                }catch (Throwable e){
+                    e.printStackTrace();
+                }
             } else {
                 Logger.e(TAG, "could not connect to device " + name);
             }
@@ -1270,6 +1291,7 @@ public final class USBMonitor {
          * @return
          * @throws IllegalStateException
          */
+        @SuppressLint("NewApi")
         public synchronized UsbInterface getInterface(final int interface_id, final int altsetting) throws IllegalStateException {
             checkConnection();
             SparseArray<UsbInterface> intfs = mInterfaces.get(interface_id);
@@ -1387,3 +1409,4 @@ public final class USBMonitor {
     }
 
 }
+

@@ -94,10 +94,8 @@ public final class DeviceFilter {
                 }
                 eventType = parser.next();
             }
-        } catch (XmlPullParserException e) {
-            Logger.d(TAG, "XmlPullParserException", e);
-        } catch (IOException e) {
-            Logger.d(TAG, "IOException", e);
+        } catch (XmlPullParserException | IOException e) {
+            Logger.d(TAG, e.getMessage());
         }
         return Collections.unmodifiableList(deviceFilters);
     }
@@ -498,3 +496,4 @@ public final class DeviceFilter {
     }
 
 }
+
