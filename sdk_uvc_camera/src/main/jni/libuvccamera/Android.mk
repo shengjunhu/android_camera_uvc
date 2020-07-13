@@ -36,7 +36,7 @@ CFLAGS := -Werror
 LOCAL_C_INCLUDES := \
 		$(LOCAL_PATH)/ \
 		$(LOCAL_PATH)/../ \
-		$(LOCAL_PATH)/../rapidjson/include \
+		$(LOCAL_PATH)/../librapidjson/include \
 
 LOCAL_CFLAGS := $(LOCAL_C_INCLUDES:%=-I%)
 LOCAL_CFLAGS += -DANDROID_NDK
@@ -48,7 +48,7 @@ LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -ldl
 LOCAL_LDLIBS += -llog
 LOCAL_LDLIBS += -landroid
 
-LOCAL_SHARED_LIBRARIES += usb100 uvc
+LOCAL_SHARED_LIBRARIES += usb_100 uvc
 
 LOCAL_ARM_MODE := arm
 
@@ -60,7 +60,7 @@ LOCAL_SRC_FILES := \
 		UVCButtonCallback.cpp \
 		UVCStatusCallback.cpp \
 		Parameters.cpp \
-		serenegiant_usb_UVCCamera.cpp
+		com_hsj_camera_UVCCamera.cpp
 
-LOCAL_MODULE    := UVCCamera
+LOCAL_MODULE    := uvc_camera
 include $(BUILD_SHARED_LIBRARY)

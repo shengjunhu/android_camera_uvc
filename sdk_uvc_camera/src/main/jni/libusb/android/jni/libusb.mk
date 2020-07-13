@@ -60,7 +60,7 @@ LOCAL_CFLAGS += -O3 -fstrict-aliasing -fprefetch-loop-arrays
 LOCAL_EXPORT_LDLIBS += -llog
 LOCAL_ARM_MODE := arm
 
-LOCAL_MODULE := libusb100_static
+LOCAL_MODULE := libusb_100_static
 include $(BUILD_STATIC_LIBRARY)
 
 ######################################################################
@@ -70,7 +70,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 LOCAL_EXPORT_LDLIBS += -llog
 
-LOCAL_WHOLE_STATIC_LIBRARIES = libusb100_static
+LOCAL_WHOLE_STATIC_LIBRARIES = libusb_100_static
 
-LOCAL_MODULE := libusb100
+LOCAL_MODULE := libusb_100
 include $(BUILD_SHARED_LIBRARY)

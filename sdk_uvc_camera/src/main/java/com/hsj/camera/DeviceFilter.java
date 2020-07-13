@@ -1,11 +1,13 @@
-package com.serenegiant.usb;
+package com.hsj.camera;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.hardware.usb.UsbDevice;
@@ -51,7 +53,8 @@ public final class DeviceFilter {
         mProductName = product;
         mSerialNumber = serialNum;
         this.isExclude = isExclude;
-        Logger.i(TAG, String.format("vendorId=0x%04x,productId=0x%04x,class=0x%02x,subclass=0x%02x,protocol=0x%02x",
+        Logger.i(TAG, String.format(
+                "vendorId=0x%04x,productId=0x%04x,class=0x%02x,subclass=0x%02x,protocol=0x%02x",
                 mVendorId, mProductId, mClass, mSubclass, mProtocol));
     }
 
@@ -65,11 +68,15 @@ public final class DeviceFilter {
         mClass = device.getDeviceClass();
         mSubclass = device.getDeviceSubclass();
         mProtocol = device.getDeviceProtocol();
-        mManufacturerName = null;    // device.getManufacturerName();
-        mProductName = null;        // device.getProductName();
-        mSerialNumber = null;        // device.getSerialNumber();
+        // device.getManufacturerName();
+        mManufacturerName = null;
+        // device.getProductName();
+        mProductName = null;
+        // device.getSerialNumber();
+        mSerialNumber = null;
         this.isExclude = isExclude;
-        Logger.i(TAG, String.format("vendorId=0x%04x,productId=0x%04x,class=0x%02x,subclass=0x%02x,protocol=0x%02x",
+        Logger.i(TAG, String.format(
+                "vendorId=0x%04x,productId=0x%04x,class=0x%02x,subclass=0x%02x,protocol=0x%02x",
                 mVendorId, mProductId, mClass, mSubclass, mProtocol));
     }
 
@@ -265,7 +272,7 @@ public final class DeviceFilter {
         return null;
     }
 
-/*	public void write(XmlSerializer serializer) throws IOException {
+	/*public void write(XmlSerializer serializer) throws IOException {
 		serializer.startTag(null, "usb-device");
 		if (mVendorId != -1) {
 			serializer
@@ -421,7 +428,6 @@ public final class DeviceFilter {
         }
         if (obj instanceof DeviceFilter) {
             DeviceFilter filter = (DeviceFilter) obj;
-
             if (filter.mVendorId != mVendorId
                     || filter.mProductId != mProductId
                     || filter.mClass != mClass || filter.mSubclass != mSubclass

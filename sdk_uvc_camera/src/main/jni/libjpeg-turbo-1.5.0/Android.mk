@@ -30,7 +30,7 @@ include $(CLEAR_VARS)
 # CFLAGS := -Werror
 
 #生成するモジュール名
-LOCAL_MODULE    := jpeg-turbo1500_static
+LOCAL_MODULE    := jpeg_turbo_1500_static
 
 #インクルードファイルのパスを指定
 LOCAL_C_INCLUDES := \
@@ -261,8 +261,8 @@ LOCAL_DISABLE_FATAL_LINKER_WARNINGS := true
 
 LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -ldl	# to avoid NDK issue(no need for static library)
 
-LOCAL_WHOLE_STATIC_LIBRARIES = jpeg-turbo1500_static
+LOCAL_WHOLE_STATIC_LIBRARIES = jpeg_turbo_1500_static
 
-LOCAL_MODULE := jpeg-turbo1500
+LOCAL_MODULE := jpeg_turbo_1500
 include $(BUILD_SHARED_LIBRARY)
 

@@ -16,8 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import com.serenegiant.usb.USBMonitor;
-import com.serenegiant.usb.UVCCamera;
+import com.hsj.camera.USBMonitor;
+import com.hsj.camera.UVCCamera;
 
 /**
  * @Author:hsj
@@ -169,7 +169,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
 
     @Override
     public void onConnect(UsbDevice device, USBMonitor.UsbControlBlock block, boolean createNew) {
-        Toast.makeText(this, "Usb device connect", Toast.LENGTH_LONG).show();
+        Log.i(TAG, "Usb device connect");
         int productId = device.getProductId();
         if (productId == CAMERA_ID_RGB) {
             cameraHandler.obtainMessage(CAMERA_CREATE, block).sendToTarget();
@@ -178,7 +178,7 @@ public final class MainActivity extends AppCompatActivity implements TextureView
 
     @Override
     public void onDisconnect(UsbDevice device, USBMonitor.UsbControlBlock ctrlBlock) {
-        Toast.makeText(this, "Usb device disconnect", Toast.LENGTH_LONG).show();
+        Log.i(TAG, "Usb device disconnect");
         if (cameraHandler != null) {
             cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
         }
@@ -186,12 +186,12 @@ public final class MainActivity extends AppCompatActivity implements TextureView
 
     @Override
     public void onCancel(UsbDevice device) {
-        Toast.makeText(this, "Usb device cancel", Toast.LENGTH_LONG).show();
+        Log.i(TAG, "Usb device cancel");
     }
 
     @Override
     public void onDetach(UsbDevice device) {
-        Toast.makeText(this, "Usb device detach", Toast.LENGTH_LONG).show();
+        Log.i(TAG, "Usb device detach");
     }
 
 //=====================================UVCCamera Action=============================================
@@ -226,6 +226,8 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         try {
             rgbCamera = new UVCCamera();
             rgbCamera.open(blockRGB);
+            rgbCamera.setPreviewOrientation(90);
+            rgbCamera.setPreviewFlip(1);
             Log.i(TAG, "rgb camera supported size=" + rgbCamera.getSupportedSize());
             rgbCamera.setPreviewSize(RGB_PREVIEW_WIDTH, RGB_PREVIEW_HEIGHT,
                     UVCCamera.FRAME_FORMAT_MJPEG, 1.0f);

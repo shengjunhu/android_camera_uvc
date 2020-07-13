@@ -20,6 +20,15 @@ void UVCPreview::addCaptureFrame(uvc_frame_t *frame) {
 	}
 	pthread_mutex_unlock(&capture_mutex);
 }
+
+* 2-fix NullPointerException for on stopPreview() of UVCpreview.cpp
+
+* 3-Adapter Android Q
+
+* 4-Add UVCCamera API with previewOrientation(int orientation);
+
+* 5-Add UVCCamera API with previewFlip(int flipH);
+
 ```
 
 ### About Author:

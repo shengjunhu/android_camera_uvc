@@ -1,4 +1,4 @@
-package com.serenegiant.usb;
+package com.hsj.camera;
 
 import android.util.SparseArray;
 

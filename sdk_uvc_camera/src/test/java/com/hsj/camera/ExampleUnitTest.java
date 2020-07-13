@@ -1,4 +1,4 @@
-package com.serenegiant.uvccamera;
+package com.hsj.camera;
 
 import org.junit.Test;
 

@@ -1,7 +1,7 @@
-package com.serenegiant.usb;
+package com.hsj.camera;
 
 import android.util.Log;
-import com.serenegiant.uvccamera.BuildConfig;
+import com.hsj.camera.BuildConfig;
 import java.lang.reflect.Method;
 
 /**

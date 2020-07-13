@@ -1,4 +1,4 @@
-package com.serenegiant.usb;
+package com.hsj.camera;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -60,13 +61,6 @@ public final class USBMonitor {
         void onAttach(UsbDevice device);
 
         /**
-         * called when device detach(after onDisconnect)
-         *
-         * @param device
-         */
-        void onDetach(UsbDevice device);
-
-        /**
          * called after device opened
          *
          * @param device
@@ -89,14 +83,21 @@ public final class USBMonitor {
          * @param device
          */
         void onCancel(UsbDevice device);
+
+        /**
+         * called when device detach(after onDisconnect)
+         *
+         * @param device
+         */
+        void onDetach(UsbDevice device);
     }
 
-    public USBMonitor(final Context context, final OnDeviceConnectListener listener) {
+    public USBMonitor(final Context context, final OnDeviceConnectListener listener) throws IllegalArgumentException {
         Logger.v(TAG, "USBMonitor:Constructor");
         if (listener == null) {
             throw new IllegalArgumentException("OnDeviceConnectListener should not null.");
         }
-        mWeakContext = new WeakReference<Context>(context);
+        mWeakContext = new WeakReference<>(context);
         mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         mOnDeviceConnectListener = listener;
         mAsyncHandler = USBHandler.createHandler(TAG);
@@ -547,12 +548,7 @@ public final class USBMonitor {
                 if (mOnDeviceConnectListener != null) {
                     for (int i = 0; i < n; i++) {
                         final UsbDevice device = devices.get(i);
-                        mAsyncHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mOnDeviceConnectListener.onAttach(device);
-                            }
-                        });
+                        mAsyncHandler.post(() -> mOnDeviceConnectListener.onAttach(device));
                     }
                 }
             }
@@ -568,23 +564,20 @@ public final class USBMonitor {
     private final void processConnect(final UsbDevice device) {
         if (destroyed) return;
         updatePermission(device, true);
-        mAsyncHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Logger.v(TAG, "processConnect:device=" + device);
-                UsbControlBlock ctrlBlock;
-                final boolean createNew;
-                ctrlBlock = mCtrlBlocks.get(device);
-                if (ctrlBlock == null) {
-                    ctrlBlock = new UsbControlBlock(USBMonitor.this, device);
-                    mCtrlBlocks.put(device, ctrlBlock);
-                    createNew = true;
-                } else {
-                    createNew = false;
-                }
-                if (mOnDeviceConnectListener != null) {
-                    mOnDeviceConnectListener.onConnect(device, ctrlBlock, createNew);
-                }
+        mAsyncHandler.post(() -> {
+            Logger.v(TAG, "processConnect:device=" + device);
+            UsbControlBlock ctrlBlock;
+            final boolean createNew;
+            ctrlBlock = mCtrlBlocks.get(device);
+            if (ctrlBlock == null) {
+                ctrlBlock = new UsbControlBlock(USBMonitor.this, device);
+                mCtrlBlocks.put(device, ctrlBlock);
+                createNew = true;
+            } else {
+                createNew = false;
+            }
+            if (mOnDeviceConnectListener != null) {
+                mOnDeviceConnectListener.onConnect(device, ctrlBlock, createNew);
             }
         });
     }
@@ -594,12 +587,7 @@ public final class USBMonitor {
         Logger.v(TAG, "processCancel:");
         updatePermission(device, false);
         if (mOnDeviceConnectListener != null) {
-            mAsyncHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mOnDeviceConnectListener.onCancel(device);
-                }
-            });
+            mAsyncHandler.post(() -> mOnDeviceConnectListener.onCancel(device));
         }
     }
 
@@ -607,12 +595,7 @@ public final class USBMonitor {
         if (destroyed) return;
         Logger.v(TAG, "processAttach:");
         if (mOnDeviceConnectListener != null) {
-            mAsyncHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mOnDeviceConnectListener.onAttach(device);
-                }
-            });
+            mAsyncHandler.post(() -> mOnDeviceConnectListener.onAttach(device));
         }
     }
 
@@ -620,12 +603,7 @@ public final class USBMonitor {
         if (destroyed) return;
         Logger.v(TAG, "processDetach:");
         if (mOnDeviceConnectListener != null) {
-            mAsyncHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mOnDeviceConnectListener.onDetach(device);
-                }
-            });
+            mAsyncHandler.post(() -> mOnDeviceConnectListener.onDetach(device));
         }
     }
 
@@ -677,7 +655,7 @@ public final class USBMonitor {
         sb.append("#");    // API >= 12
         sb.append(device.getDeviceSubclass());
         sb.append("#");    // API >= 12
-        sb.append(device.getDeviceProtocol());                        // API >= 12
+        sb.append(device.getDeviceProtocol());// API >= 12
         if (!TextUtils.isEmpty(serial)) {
             sb.append("#");
             sb.append(serial);
@@ -881,7 +859,7 @@ public final class USBMonitor {
                         result = null;
                     }
                 } catch (final UnsupportedEncodingException e) {
-                    // ignore
+                    Logger.w(e.getMessage());
                 }
             }
         }
@@ -933,7 +911,7 @@ public final class USBMonitor {
             }
             if ((manager != null) && manager.hasPermission(device)) {
                 final UsbDeviceConnection connection = manager.openDevice(device);
-                if (connection!=null){//Add by shengjunhu
+                if (connection != null) {//Add by shengjunhu
                     final byte[] desc = connection.getRawDescriptors();
 
                     if (TextUtils.isEmpty(info.usb_version)) {
@@ -1025,8 +1003,10 @@ public final class USBMonitor {
                 try {
                     final int desc = mConnection.getFileDescriptor();
                     final byte[] rawDesc = mConnection.getRawDescriptors();
-                    Logger.i(TAG, String.format(Locale.US, "name=%s,desc=%d,busnum=%d,devnum=%d,rawDesc=", name, desc, busnum, devnum) + rawDesc);
-                }catch (Throwable e){
+                    Logger.i(TAG, String.format(
+                            Locale.US, "name=%s,desc=%d,busnum=%d,devnum=%d,rawDesc=",
+                            name, desc, busnum, devnum) + rawDesc);
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             } else {
@@ -1055,7 +1035,7 @@ public final class USBMonitor {
             mWeakDevice = new WeakReference<UsbDevice>(device);
             mBusNum = src.mBusNum;
             mDevNum = src.mDevNum;
-            // FIXME USBMonitor.mCtrlBlocksに追加する(今はHashMapなので追加すると置き換わってしまうのでだめ, ListかHashMapにListをぶら下げる?)
+            // FIXME USBMonitor.mCtrlBlocks(since HashMap is now replaced, add it to the list or HashMap)
         }
 
         /**
@@ -1395,11 +1375,11 @@ public final class USBMonitor {
             return super.equals(o);
         }
 
-//		@Override
-//		protected void finalize() throws Throwable {
-///			close();
-//			super.finalize();
-//		}
+        //@Override
+        //protected void finalize() throws Throwable {
+        //    close();
+        //    super.finalize();
+        //}
 
         private synchronized void checkConnection() throws IllegalStateException {
             if (mConnection == null) {

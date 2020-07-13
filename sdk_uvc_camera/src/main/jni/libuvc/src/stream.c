@@ -392,7 +392,7 @@ static uvc_error_t _prepare_stream_ctrl(uvc_device_handle_t *devh, uvc_stream_ct
 			LOGE("uvc_query_stream_ctrl:UVC_GET_MIN:err=%d", result);
 		}
 	} else {
-		LOGE("uvc_query_stream_ctrl:UVC_GET_CUR:err=%d", result);
+		LOGW("uvc_query_stream_ctrl:UVC_GET_CUR:warn=%d", result);
 	}
 #if 0
 	if (UNLIKELY(result)) {

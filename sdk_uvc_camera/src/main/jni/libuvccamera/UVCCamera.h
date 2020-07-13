@@ -124,10 +124,10 @@ class UVCCamera {
 	control_value_t mExposurePriority;
 	control_value_t mExposureAbs;
 	control_value_t mAutoFocus;
-	control_value_t mAutoWhiteBlance;
-	control_value_t mAutoWhiteBlanceCompo;
-	control_value_t mWhiteBlance;
-	control_value_t mWhiteBlanceCompo;
+	control_value_t mAutoWhiteBalance;
+	control_value_t mAutoWhiteBalanceCompo;
+	control_value_t mWhiteBalance;
+	control_value_t mWhiteBalanceCompo;
 	control_value_t mBacklightComp;
 	control_value_t mBrightness;
 	control_value_t mContrast;
@@ -195,6 +195,9 @@ public:
 	int stopPreview();
 	int setCaptureDisplay(ANativeWindow *capture_window);
 
+	int setPreviewOrientation(int orientation);
+	int setPreviewFlip(int flipH);
+
 	int getCtrlSupports(uint64_t *supports);
 	int getProcSupports(uint64_t *supports);
 
@@ -230,9 +233,9 @@ public:
 	int setFocusRel(int focus);
 	int getFocusRel();
 	
-/*	int updateFocusSimpleLimit(int &min, int &max, int &def);
-	int setFocusSimple(int focus);
-	int getFocusSimple(); */
+	//int updateFocusSimpleLimit(int &min, int &max, int &def);
+	//int setFocusSimple(int focus);
+	//int getFocusSimple();
 	
 	int updateIrisLimit(int &min, int &max, int &def);
 	int setIris(int iris);
@@ -270,21 +273,21 @@ public:
 	int setPrivacy(int privacy);
 	int getPrivacy();
 	
-	int updateAutoWhiteBlanceLimit(int &min, int &max, int &def);
-	int setAutoWhiteBlance(bool autoWhiteBlance);
-	bool getAutoWhiteBlance();
+	int updateAutoWhiteBalanceLimit(int &min, int &max, int &def);
+	int setAutoWhiteBalance(bool autoWhiteBalance);
+	bool getAutoWhiteBalance();
 
-	int updateAutoWhiteBlanceCompoLimit(int &min, int &max, int &def);
-	int setAutoWhiteBlanceCompo(bool autoWhiteBlanceCompo);
-	bool getAutoWhiteBlanceCompo();
+	int updateAutoWhiteBalanceCompoLimit(int &min, int &max, int &def);
+	int setAutoWhiteBalanceCompo(bool autoWhiteBalanceCompo);
+	bool getAutoWhiteBalanceCompo();
 	
-	int updateWhiteBlanceLimit(int &min, int &max, int &def);
-	int setWhiteBlance(int temp);
-	int getWhiteBlance();
+	int updateWhiteBalanceLimit(int &min, int &max, int &def);
+	int setWhiteBalance(int temp);
+	int getWhiteBalance();
 
-	int updateWhiteBlanceCompoLimit(int &min, int &max, int &def);
-	int setWhiteBlanceCompo(int white_blance_compo);
-	int getWhiteBlanceCompo();
+	int updateWhiteBalanceCompoLimit(int &min, int &max, int &def);
+	int setWhiteBalanceCompo(int white_balance_compo);
+	int getWhiteBalanceCompo();
 	
 	int updateBacklightCompLimit(int &min, int &max, int &def);
 	int setBacklightComp(int backlight);
