@@ -23,7 +23,7 @@
 */
 
 #define LOG_TAG "UVCCamera"
-#if 1	// デバッグ情報を出さない時1
+#if 1	// 当1时，不输出调试信息
 	#ifndef LOG_NDEBUG
 		#define	LOG_NDEBUG		// LOGV/LOGD/MARKを出力しない時
 		#endif
@@ -51,8 +51,9 @@
 //**********************************************************************
 //
 //**********************************************************************
+
 /**
- * コンストラクタ
+ * Constructor class
  */
 UVCCamera::UVCCamera()
 :	mFd(0),
@@ -72,7 +73,7 @@ UVCCamera::UVCCamera()
 }
 
 /**
- * デストラクタ
+ * Constructor class
  */
 UVCCamera::~UVCCamera() {
 	ENTER();
@@ -131,9 +132,7 @@ void UVCCamera::clearCameraParams() {
 }
 
 //======================================================================
-/**
- * カメラへ接続する
- */
+//connect camera
 int UVCCamera::connect(int vid, int pid, int fd, int busnum, int devaddr, const char *usbfs) {
 	ENTER();
 	uvc_error_t result = UVC_ERROR_BUSY;
@@ -143,20 +142,20 @@ int UVCCamera::connect(int vid, int pid, int fd, int busnum, int devaddr, const 
 		mUsbFs = strdup(usbfs);
 		if (UNLIKELY(!mContext)) {
 			result = uvc_init2(&mContext, NULL, mUsbFs);
-//			libusb_set_debug(mContext->usb_ctx, LIBUSB_LOG_LEVEL_DEBUG);
+			//libusb_set_debug(mContext->usb_ctx, LIBUSB_LOG_LEVEL_DEBUG);
 			if (UNLIKELY(result < 0)) {
 				LOGD("failed to init libuvc");
 				RETURN(result, int);
 			}
 		}
-		// カメラ機能フラグをクリア
+		// 清除相机功能标志
 		clearCameraParams();
 		fd = dup(fd);
-		// 指定したvid,idを持つデバイスを検索, 見つかれば0を返してmDeviceに見つかったデバイスをセットする(既に1回uvc_ref_deviceを呼んである)
-//		result = uvc_find_device2(mContext, &mDevice, vid, pid, NULL, fd);
+		// 搜索具有指定vid和​​id的设备，如果找到则返回0，然后将找到的设备设置为mDevice（已经称为uvc_ref_device一次）
+		//result = uvc_find_device2(mContext, &mDevice, vid, pid, NULL, fd);
 		result = uvc_get_device_with_fd(mContext, &mDevice, vid, pid, NULL, fd, busnum, devaddr);
 		if (LIKELY(!result)) {
-			// カメラのopen処理
+			// 相机打开处理
 			result = uvc_open(mDevice, &mDeviceHandle);
 			if (LIKELY(!result)) {
 				// open出来た時
@@ -171,7 +170,8 @@ int UVCCamera::connect(int vid, int pid, int fd, int busnum, int devaddr, const 
 				// open出来なかった時
 				LOGE("could not open camera:err=%d", result);
 				uvc_unref_device(mDevice);
-//				SAFE_DELETE(mDevice);	// 参照カウンタが0ならuvc_unref_deviceでmDeviceがfreeされるから不要 XXX クラッシュ, 既に破棄されているのを再度破棄しようとしたからみたい
+				// 如果参考计数器为0，则不必要，因为uvc_unref_device释放了mDevice。XXX崩溃，看来您试图破坏已经破坏的1。
+				//SAFE_DELETE(mDevice);	
 				mDevice = NULL;
 				mDeviceHandle = NULL;
 				close(fd);
@@ -181,25 +181,25 @@ int UVCCamera::connect(int vid, int pid, int fd, int busnum, int devaddr, const 
 			close(fd);
 		}
 	} else {
-		// カメラが既にopenしている時
+		// 相机已经打开时
 		LOGW("camera is already opened. you should release first");
 	}
 	RETURN(result, int);
 }
 
-// カメラを開放する
+// release camera resource
 int UVCCamera::release() {
 	ENTER();
 	stopPreview();
-	// カメラのclose処理
+	// 相机关闭处理
 	if (LIKELY(mDeviceHandle)) {
 		MARK("カメラがopenしていたら開放する");
-		// ステータスコールバックオブジェクトを破棄
+		// 销毁状态回调对象
 		SAFE_DELETE(mStatusCallback);
 		SAFE_DELETE(mButtonCallback);
-		// プレビューオブジェクトを破棄
+		// 放弃预览对象
 		SAFE_DELETE(mPreview);
-		// カメラをclose
+		// 关闭相机
 		uvc_close(mDeviceHandle);
 		mDeviceHandle = NULL;
 	}
@@ -208,7 +208,7 @@ int UVCCamera::release() {
 		uvc_unref_device(mDevice);
 		mDevice = NULL;
 	}
-	// カメラ機能フラグをクリア
+	// 清除相机功能标志
 	clearCameraParams();
 	if (mUsbFs) {
 		close(mFd);
@@ -255,6 +255,26 @@ int UVCCamera::setPreviewSize(int width, int height, int min_fps, int max_fps, i
 	RETURN(result, int);
 }
 
+//Add by shengjunhu for set preview orientation
+int UVCCamera::setPreviewOrientation(int orientation) {
+	ENTER();
+	int result = EXIT_FAILURE;
+	if (mPreview) {
+		return mPreview->setPreviewOrientation(orientation);
+	}
+	RETURN(result, int);
+}
+
+//Add by shengjunhu for set preview flip
+int UVCCamera::setPreviewFlip(int flipH) {
+	ENTER();
+	int result = EXIT_FAILURE;
+	if (mPreview) {
+		return mPreview->setPreviewFlip(flipH);
+	}
+	RETURN(result, int);
+}
+
 int UVCCamera::setPreviewDisplay(ANativeWindow *preview_window) {
 	ENTER();
 	int result = EXIT_FAILURE;
@@ -275,7 +295,6 @@ int UVCCamera::setFrameCallback(JNIEnv *env, jobject frame_callback_obj, int pix
 
 int UVCCamera::startPreview() {
 	ENTER();
-
 	int result = EXIT_FAILURE;
 	if (mDeviceHandle) {
 		return mPreview->startPreview();
@@ -301,13 +320,13 @@ int UVCCamera::setCaptureDisplay(ANativeWindow *capture_window) {
 }
 
 //======================================================================
-// カメラのサポートしているコントロール機能を取得する
+// 获取相机支持的控制功能
 int UVCCamera::getCtrlSupports(uint64_t *supports) {
 	ENTER();
 	uvc_error_t ret = UVC_ERROR_NOT_FOUND;
 	if (LIKELY(mDeviceHandle)) {
 		if (!mCtrlSupports) {
-			// 何個あるのかわからへんねんけど、試した感じは１個みたいやからとりあえず先頭のを返す
+			// 我不知道有多少，但是我觉得我已经尝试过了，所以我只返回第一个
 			const uvc_input_terminal_t *input_terminals = uvc_get_input_terminals(mDeviceHandle);
 			const uvc_input_terminal_t *it;
 			DL_FOREACH(input_terminals, it)
@@ -332,7 +351,7 @@ int UVCCamera::getProcSupports(uint64_t *supports) {
 	uvc_error_t ret = UVC_ERROR_NOT_FOUND;
 	if (LIKELY(mDeviceHandle)) {
 		if (!mPUSupports) {
-			// 何個あるのかわからへんねんけど、試した感じは１個みたいやからとりあえず先頭のを返す
+			// 我不知道有多少，但是我觉得我已经尝试过了，所以我只返回第一个
 			const uvc_processing_unit_t *proc_units = uvc_get_processing_units(mDeviceHandle);
 			const uvc_processing_unit_t *pu;
 			DL_FOREACH(proc_units, pu)
@@ -682,7 +701,8 @@ static uvc_error_t update_ctrl_values(uvc_device_handle_t *devh, control_value_t
 int UVCCamera::internalSetCtrlValue(control_value_t &values, int8_t value,
 		paramget_func_i8 get_func, paramset_func_i8 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		value = value < values.min
 			? values.min
 			: (value > values.max ? values.max : value);
@@ -694,7 +714,8 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, int8_t value,
 int UVCCamera::internalSetCtrlValue(control_value_t &values, uint8_t value,
 		paramget_func_u8 get_func, paramset_func_u8 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		value = value < values.min
 			? values.min
 			: (value > values.max ? values.max : value);
@@ -706,7 +727,8 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, uint8_t value,
 int UVCCamera::internalSetCtrlValue(control_value_t &values, uint8_t value1, uint8_t value2,
 		paramget_func_u8u8 get_func, paramset_func_u8u8 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		uint8_t v1min = (uint8_t)((values.min >> 8) & 0xff);
 		uint8_t v2min = (uint8_t)(values.min & 0xff);
 		uint8_t v1max = (uint8_t)((values.max >> 8) & 0xff);
@@ -725,7 +747,8 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, uint8_t value1, uin
 int UVCCamera::internalSetCtrlValue(control_value_t &values, int8_t value1, uint8_t value2,
 		paramget_func_i8u8 get_func, paramset_func_i8u8 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		int8_t v1min = (int8_t)((values.min >> 8) & 0xff);
 		uint8_t v2min = (uint8_t)(values.min & 0xff);
 		int8_t v1max = (int8_t)((values.max >> 8) & 0xff);
@@ -744,7 +767,8 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, int8_t value1, uint
 int UVCCamera::internalSetCtrlValue(control_value_t &values, int8_t value1, uint8_t value2, uint8_t value3,
 		paramget_func_i8u8u8 get_func, paramset_func_i8u8u8 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		int8_t v1min = (int8_t)((values.min >> 16) & 0xff);
 		uint8_t v2min = (uint8_t)((values.min >> 8) & 0xff);
 		uint8_t v3min = (uint8_t)(values.min & 0xff);
@@ -766,12 +790,13 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, int8_t value1, uint
 }
 
 /**
- * カメラコントロール設定の下請け
+ * 分包相机控制设置
  */
 int UVCCamera::internalSetCtrlValue(control_value_t &values, int16_t value,
 		paramget_func_i16 get_func, paramset_func_i16 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		value = value < values.min
 			? values.min
 			: (value > values.max ? values.max : value);
@@ -781,12 +806,13 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, int16_t value,
 }
 
 /**
- * カメラコントロール設定の下請け
+ * 分包相机控制设置
  */
 int UVCCamera::internalSetCtrlValue(control_value_t &values, uint16_t value,
 		paramget_func_u16 get_func, paramset_func_u16 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		value = value < values.min
 			? values.min
 			: (value > values.max ? values.max : value);
@@ -796,12 +822,13 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, uint16_t value,
 }
 
 /**
- * カメラコントロール設定の下請け
+ * 分包相机控制设置
  */
 int UVCCamera::internalSetCtrlValue(control_value_t &values, int32_t value,
 		paramget_func_i32 get_func, paramset_func_i32 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		value = value < values.min
 			? values.min
 			: (value > values.max ? values.max : value);
@@ -811,12 +838,13 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, int32_t value,
 }
 
 /**
- * カメラコントロール設定の下請け
+ * 分包相机控制设置
  */
 int UVCCamera::internalSetCtrlValue(control_value_t &values, uint32_t value,
 		paramget_func_u32 get_func, paramset_func_u32 set_func) {
 	int ret = update_ctrl_values(mDeviceHandle, values, get_func);
-	if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+	if (LIKELY(!ret)) {	
+		// 正常に最小・最大値を取得出来た時
 		value = value < values.min
 			? values.min
 			: (value > values.max ? values.max : value);
@@ -826,7 +854,7 @@ int UVCCamera::internalSetCtrlValue(control_value_t &values, uint32_t value,
 }
 
 //======================================================================
-// スキャニングモード
+// 扫描方式
 int UVCCamera::updateScanningModeLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -836,26 +864,25 @@ int UVCCamera::updateScanningModeLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// スキャニングモードをセット
+// 设置扫描模式
 int UVCCamera::setScanningMode(int mode) {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_SCANNING)) {
-//		LOGI("ae:%d", mode);
+		//LOGI("ae:%d", mode);
 		r = uvc_set_scanning_mode(mDeviceHandle, mode/* & 0xff*/);
 	}
 	RETURN(r, int);
 }
 
-// スキャニングモード設定を取得
+// 获取扫描模式
 int UVCCamera::getScanningMode() {
-
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_SCANNING)) {
 		uint8_t mode;
 		r = uvc_get_scanning_mode(mDeviceHandle, &mode, UVC_GET_CUR);
-//		LOGI("ae:%d", mode);
+		//LOGI("ae:%d", mode);
 		if (LIKELY(!r)) {
 			r = mode;
 		}
@@ -864,7 +891,7 @@ int UVCCamera::getScanningMode() {
 }
 
 //======================================================================
-// 露出モード
+// 曝光模式
 int UVCCamera::updateExposureModeLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -874,26 +901,25 @@ int UVCCamera::updateExposureModeLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// 露出をセット
+// 设置曝光模式
 int UVCCamera::setExposureMode(int mode) {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_AE)) {
-//		LOGI("ae:%d", mode);
+		//LOGI("ae:%d", mode);
 		r = uvc_set_ae_mode(mDeviceHandle, mode/* & 0xff*/);
 	}
 	RETURN(r, int);
 }
 
-// 露出設定を取得
+// 获取曝光模式
 int UVCCamera::getExposureMode() {
-
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_AE)) {
 		uint8_t mode;
 		r = uvc_get_ae_mode(mDeviceHandle, &mode, UVC_GET_CUR);
-//		LOGI("ae:%d", mode);
+		//LOGI("ae:%d", mode);
 		if (LIKELY(!r)) {
 			r = mode;
 		}
@@ -902,7 +928,7 @@ int UVCCamera::getExposureMode() {
 }
 
 //======================================================================
-// 露出優先設定
+// 更新曝光优先设置
 int UVCCamera::updateExposurePriorityLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -912,26 +938,25 @@ int UVCCamera::updateExposurePriorityLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// 露出優先設定をセット
+// 曝光优先级设置
 int UVCCamera::setExposurePriority(int priority) {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_AE_PRIORITY)) {
-//		LOGI("ae priority:%d", priority);
+		//LOGI("ae priority:%d", priority);
 		r = uvc_set_ae_priority(mDeviceHandle, priority/* & 0xff*/);
 	}
 	RETURN(r, int);
 }
 
-// 露出優先設定を取得
+// 曝光优先级获取
 int UVCCamera::getExposurePriority() {
-
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_AE_PRIORITY)) {
 		uint8_t priority;
 		r = uvc_get_ae_priority(mDeviceHandle, &priority, UVC_GET_CUR);
-//		LOGI("ae priority:%d", priority);
+		//LOGI("ae priority:%d", priority);
 		if (LIKELY(!r)) {
 			r = priority;
 		}
@@ -955,7 +980,7 @@ int UVCCamera::setExposure(int ae_abs) {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_AE_ABS)) {
-//		LOGI("ae_abs:%d", ae_abs);
+		//LOGI("ae_abs:%d", ae_abs);
 		r = uvc_set_exposure_abs(mDeviceHandle, ae_abs/* & 0xff*/);
 	}
 	RETURN(r, int);
@@ -969,7 +994,7 @@ int UVCCamera::getExposure() {
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_AE_ABS)) {
 		int ae_abs;
 		r = uvc_get_exposure_abs(mDeviceHandle, &ae_abs, UVC_GET_CUR);
-//		LOGI("ae_abs:%d", ae_abs);
+		//LOGI("ae_abs:%d", ae_abs);
 		if (LIKELY(!r)) {
 			r = ae_abs;
 		}
@@ -993,7 +1018,7 @@ int UVCCamera::setExposureRel(int ae_rel) {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_AE_REL)) {
-//		LOGI("ae_rel:%d", ae_rel);
+		//LOGI("ae_rel:%d", ae_rel);
 		r = uvc_set_exposure_rel(mDeviceHandle, ae_rel/* & 0xff*/);
 	}
 	RETURN(r, int);
@@ -1001,13 +1026,12 @@ int UVCCamera::setExposureRel(int ae_rel) {
 
 // 露出(相対値)設定を取得
 int UVCCamera::getExposureRel() {
-
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_AE_REL)) {
 		int ae_rel;
 		r = uvc_get_exposure_rel(mDeviceHandle, &ae_rel, UVC_GET_CUR);
-//		LOGI("ae_rel:%d", ae_rel);
+		//LOGI("ae_rel:%d", ae_rel);
 		if (LIKELY(!r)) {
 			r = ae_rel;
 		}
@@ -1016,7 +1040,7 @@ int UVCCamera::getExposureRel() {
 }
 
 //======================================================================
-// オートフォーカス
+// 自动对焦
 int UVCCamera::updateAutoFocusLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1026,10 +1050,9 @@ int UVCCamera::updateAutoFocusLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// オートフォーカスをon/off
+// 设置是否自动对焦
 int UVCCamera::setAutoFocus(bool autoFocus) {
 	ENTER();
-
 	int r = UVC_ERROR_ACCESS;
 	if LIKELY((mDeviceHandle) && (mCtrlSupports & CTRL_FOCUS_AUTO)) {
 		r = uvc_set_focus_auto(mDeviceHandle, autoFocus);
@@ -1037,7 +1060,7 @@ int UVCCamera::setAutoFocus(bool autoFocus) {
 	RETURN(r, int);
 }
 
-// オートフォーカスのon/off状態を取得
+// 获取是否自动对焦
 bool UVCCamera::getAutoFocus() {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
@@ -1051,7 +1074,7 @@ bool UVCCamera::getAutoFocus() {
 }
 
 //======================================================================
-// フォーカス(絶対値)調整
+// 焦点（绝对值）调整
 int UVCCamera::updateFocusLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_ACCESS;
@@ -1076,7 +1099,8 @@ int UVCCamera::getFocus() {
 	ENTER();
 	if (mCtrlSupports & CTRL_FOCUS_ABS) {
 		int ret = update_ctrl_values(mDeviceHandle, mFocus, uvc_get_focus_abs);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			int16_t value;
 			ret = uvc_get_focus_abs(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1087,7 +1111,7 @@ int UVCCamera::getFocus() {
 }
 
 //======================================================================
-// フォーカス(相対値)調整
+// 焦点（相对值）调整
 int UVCCamera::updateFocusRelLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_ACCESS;
@@ -1112,7 +1136,8 @@ int UVCCamera::getFocusRel() {
 	ENTER();
 	if (mCtrlSupports & CTRL_FOCUS_REL) {
 		int ret = update_ctrl_values(mDeviceHandle, mFocusRel, uvc_get_focus_abs);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			int8_t focus;
 			uint8_t speed;
 			ret = uvc_get_focus_rel(mDeviceHandle, &focus, &speed, UVC_GET_CUR);
@@ -1150,7 +1175,8 @@ int UVCCamera::getFocusSimple() {
 	ENTER();
 	if (mCtrlSupports & CTRL_FOCUS_SIMPLE) {
 		int ret = update_ctrl_values(mDeviceHandle, mFocusSimple, uvc_get_focus_abs);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+		    // 正常に最小・最大値を取得出来た時
 			uint8_t value;
 			ret = uvc_get_focus_simple_range(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1162,7 +1188,7 @@ int UVCCamera::getFocusSimple() {
 */
 
 //======================================================================
-// 絞り(絶対値)調整
+// 光圈（绝对值）调整
 int UVCCamera::updateIrisLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_ACCESS;
@@ -1187,7 +1213,8 @@ int UVCCamera::getIris() {
 	ENTER();
 	if (mCtrlSupports & CTRL_IRIS_ABS) {
 		int ret = update_ctrl_values(mDeviceHandle, mIris, uvc_get_iris_abs);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			uint16_t value;
 			ret = uvc_get_iris_abs(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1198,7 +1225,7 @@ int UVCCamera::getIris() {
 }
 
 //======================================================================
-// 絞り(相対値)調整
+// 光圈（相对值）调整
 int UVCCamera::updateIrisRelLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_ACCESS;
@@ -1223,7 +1250,8 @@ int UVCCamera::getIrisRel() {
 	ENTER();
 	if (mCtrlSupports & CTRL_IRIS_REL) {
 		int ret = update_ctrl_values(mDeviceHandle, mIris, uvc_get_iris_rel);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			uint8_t iris_rel;
 			ret = uvc_get_iris_rel(mDeviceHandle, &iris_rel, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1274,7 +1302,8 @@ int UVCCamera::getPan() {
 	ENTER();
 	if (mCtrlSupports & CTRL_PANTILT_ABS) {
 		int ret = update_ctrl_values(mDeviceHandle, mPan, mTilt, uvc_get_pantilt_abs);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			int32_t pan, tilt;
 			ret = uvc_get_pantilt_abs(mDeviceHandle, &pan, &tilt, UVC_GET_CUR);
 			if (LIKELY(!ret)) {
@@ -1328,7 +1357,8 @@ int UVCCamera::getTilt() {
 	ENTER();
 	if (mCtrlSupports & CTRL_PANTILT_ABS) {
 		int ret = update_ctrl_values(mDeviceHandle, mPan, mTilt, uvc_get_pantilt_abs);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			int32_t pan, tilt;
 			ret = uvc_get_pantilt_abs(mDeviceHandle, &pan, &tilt, UVC_GET_CUR);
 			if (LIKELY(!ret)) {
@@ -1362,12 +1392,13 @@ int UVCCamera::setRoll(int roll) {
 	RETURN(ret, int);
 }
 
-// Roll(絶対値)の現在値を取得
+// 获取当前滚动值（绝对值）
 int UVCCamera::getRoll() {
 	ENTER();
 	if (mCtrlSupports & CTRL_ROLL_ABS) {
 		int ret = update_ctrl_values(mDeviceHandle, mRoll, uvc_get_roll_abs);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			int16_t roll;
 			ret = uvc_get_roll_abs(mDeviceHandle, &roll, UVC_GET_CUR);
 			if (LIKELY(!ret)) {
@@ -1437,7 +1468,7 @@ int UVCCamera::getRollRel() {
 }
 
 //======================================================================
-// プライバシーモード
+// 更新隐私限制
 int UVCCamera::updatePrivacyLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_ACCESS;
@@ -1447,7 +1478,7 @@ int UVCCamera::updatePrivacyLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// プライバシーモードを設定
+// 设置隐私模式
 int UVCCamera::setPrivacy(int privacy) {
 	ENTER();
 	int ret = UVC_ERROR_ACCESS;
@@ -1457,12 +1488,13 @@ int UVCCamera::setPrivacy(int privacy) {
 	RETURN(ret, int);
 }
 
-// プライバシーモードの現在値を取得
+// 获取隐私模式的当前值
 int UVCCamera::getPrivacy() {
 	ENTER();
 	if (mCtrlSupports & CTRL_PRIVACY) {
 		int ret = update_ctrl_values(mDeviceHandle, mPrivacy, uvc_get_privacy);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			uint8_t privacy;
 			ret = uvc_get_privacy(mDeviceHandle, &privacy, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1521,7 +1553,7 @@ int UVCCamera::getDigitalRoi(int &top, int &reft, int &bottom, int &right) {
 */
 
 //======================================================================
-// backlight_compensation
+// 更新背光补偿
 int UVCCamera::updateBacklightCompLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1531,7 +1563,7 @@ int UVCCamera::updateBacklightCompLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// backlight_compensationを設定
+// 设置背光补偿
 int UVCCamera::setBacklightComp(int backlight) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1541,12 +1573,13 @@ int UVCCamera::setBacklightComp(int backlight) {
 	RETURN(ret, int);
 }
 
-// backlight_compensationの現在値を取得
+// 获取当前背光补偿
 int UVCCamera::getBacklightComp() {
 	ENTER();
 	if (mPUSupports & PU_BACKLIGHT) {
 		int ret = update_ctrl_values(mDeviceHandle, mBacklightComp, uvc_get_backlight_compensation);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			int16_t value;
 			ret = uvc_get_backlight_compensation(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1558,7 +1591,7 @@ int UVCCamera::getBacklightComp() {
 
 
 //======================================================================
-// 明るさ
+// 更新亮度
 int UVCCamera::updateBrightnessLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1568,6 +1601,7 @@ int UVCCamera::updateBrightnessLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
+// 设置亮度值
 int UVCCamera::setBrightness(int brightness) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1577,12 +1611,13 @@ int UVCCamera::setBrightness(int brightness) {
 	RETURN(ret, int);
 }
 
-// 明るさの現在値を取得
+// 获取当前亮度值
 int UVCCamera::getBrightness() {
 	ENTER();
 	if (mPUSupports & PU_BRIGHTNESS) {
 		int ret = update_ctrl_values(mDeviceHandle, mBrightness, uvc_get_brightness);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			int16_t value;
 			ret = uvc_get_brightness(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1593,7 +1628,7 @@ int UVCCamera::getBrightness() {
 }
 
 //======================================================================
-// コントラスト調整
+// 更新对比度
 int UVCCamera::updateContrastLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1603,7 +1638,7 @@ int UVCCamera::updateContrastLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// コントラストを設定
+// 设定对比
 int UVCCamera::setContrast(uint16_t contrast) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1613,12 +1648,13 @@ int UVCCamera::setContrast(uint16_t contrast) {
 	RETURN(ret, int);
 }
 
-// コントラストの現在値を取得
+// 获取当前对比度值
 int UVCCamera::getContrast() {
 	ENTER();
 	if (mPUSupports & PU_CONTRAST) {
 		int ret = update_ctrl_values(mDeviceHandle, mContrast, uvc_get_contrast);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			uint16_t value;
 			ret = uvc_get_contrast(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1629,7 +1665,7 @@ int UVCCamera::getContrast() {
 }
 
 //======================================================================
-// オートコントラスト
+// 自动对比
 int UVCCamera::updateAutoContrastLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1639,7 +1675,7 @@ int UVCCamera::updateAutoContrastLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// オートコントラストをon/off
+// 自动对比度开/关
 int UVCCamera::setAutoContrast(bool autoContrast) {
 	ENTER();
 
@@ -1650,7 +1686,7 @@ int UVCCamera::setAutoContrast(bool autoContrast) {
 	RETURN(r, int);
 }
 
-// オートコントラストのon/off状態を取得
+// 获取自动对比开/关状态
 bool UVCCamera::getAutoContrast() {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
@@ -1664,7 +1700,7 @@ bool UVCCamera::getAutoContrast() {
 }
 
 //======================================================================
-// シャープネス調整
+// 更新清晰度
 int UVCCamera::updateSharpnessLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1674,7 +1710,7 @@ int UVCCamera::updateSharpnessLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// シャープネスを設定
+// 设定清晰度
 int UVCCamera::setSharpness(int sharpness) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1684,12 +1720,13 @@ int UVCCamera::setSharpness(int sharpness) {
 	RETURN(ret, int);
 }
 
-// シャープネスの現在値を取得
+// 获取当前的清晰度
 int UVCCamera::getSharpness() {
 	ENTER();
 	if (mPUSupports & PU_SHARPNESS) {
 		int ret = update_ctrl_values(mDeviceHandle, mSharpness, uvc_get_sharpness);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {
+			// 正常に最小・最大値を取得出来た時
 			uint16_t value;
 			ret = uvc_get_sharpness(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1700,7 +1737,7 @@ int UVCCamera::getSharpness() {
 }
 
 //======================================================================
-// ゲイン調整
+// 更新增益
 int UVCCamera::updateGainLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1710,7 +1747,7 @@ int UVCCamera::updateGainLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// ゲインを設定
+// 设定增益
 int UVCCamera::setGain(int gain) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1721,15 +1758,16 @@ int UVCCamera::setGain(int gain) {
 	RETURN(ret, int);
 }
 
-// ゲインの現在値を取得
+// 获取当前的增益值
 int UVCCamera::getGain() {
 	ENTER();
 	if (mPUSupports & PU_GAIN) {
 		int ret = update_ctrl_values(mDeviceHandle, mGain, uvc_get_gain);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			uint16_t value;
 			ret = uvc_get_gain(mDeviceHandle, &value, UVC_GET_CUR);
-//			LOGI("gain:%d", value);
+			//LOGI("gain:%d", value);
 			if (LIKELY(!ret))
 				return value;
 		}
@@ -1738,7 +1776,7 @@ int UVCCamera::getGain() {
 }
 
 //======================================================================
-// オートホワイトバランス(temp)
+// 自动白平衡（温度）
 int UVCCamera::updateAutoWhiteBalanceLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1748,7 +1786,7 @@ int UVCCamera::updateAutoWhiteBalanceLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// オートホワイトバランス(temp)をon/off
+// 自动白平衡（温度）开/关
 int UVCCamera::setAutoWhiteBalance(bool autoWhiteBalance) {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
@@ -1758,7 +1796,7 @@ int UVCCamera::setAutoWhiteBalance(bool autoWhiteBalance) {
 	RETURN(r, int);
 }
 
-// オートホワイトバランス(temp)のon/off状態を取得
+// 获取自动白平衡的开/关状态（温度）
 bool UVCCamera::getAutoWhiteBalance() {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
@@ -1772,7 +1810,7 @@ bool UVCCamera::getAutoWhiteBalance() {
 }
 
 //======================================================================
-// オートホワイトバランス(compo)
+// 自动白平衡（COMPO）
 int UVCCamera::updateAutoWhiteBalanceCompoLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1782,7 +1820,7 @@ int UVCCamera::updateAutoWhiteBalanceCompoLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// オートホワイトバランス(compo)をon/off
+// 自动白平衡（compo）开/关
 int UVCCamera::setAutoWhiteBalanceCompo(bool autoWhiteBalanceCompo) {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
@@ -1792,7 +1830,7 @@ int UVCCamera::setAutoWhiteBalanceCompo(bool autoWhiteBalanceCompo) {
 	RETURN(r, int);
 }
 
-// オートホワイトバランス(compo)のon/off状態を取得
+// 获取自动白平衡（compo）的状态
 bool UVCCamera::getAutoWhiteBalanceCompo() {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
@@ -1806,7 +1844,7 @@ bool UVCCamera::getAutoWhiteBalanceCompo() {
 }
 
 //======================================================================
-// ホワイトバランス色温度調整
+// 更新白平衡色温值
 int UVCCamera::updateWhiteBalanceLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1816,7 +1854,7 @@ int UVCCamera::updateWhiteBalanceLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// ホワイトバランス色温度を設定
+// 设置白平衡色温值
 int UVCCamera::setWhiteBalance(int white_balance) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1827,12 +1865,13 @@ int UVCCamera::setWhiteBalance(int white_balance) {
 	RETURN(ret, int);
 }
 
-// ホワイトバランス色温度の現在値を取得
+// 获取当前白平衡色温值
 int UVCCamera::getWhiteBalance() {
 	ENTER();
 	if (mPUSupports & PU_WB_TEMP) {
 		int ret = update_ctrl_values(mDeviceHandle, mWhiteBalance, uvc_get_white_balance_temperature);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 获取正常的最大值和最小值
 			uint16_t value;
 			ret = uvc_get_white_balance_temperature(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1843,8 +1882,7 @@ int UVCCamera::getWhiteBalance() {
 }
 
 //==================================================================================================
-
-// ホワイトバランスcompo調整
+// 白平衡调整
 int UVCCamera::updateWhiteBalanceCompoLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1854,7 +1892,7 @@ int UVCCamera::updateWhiteBalanceCompoLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// ホワイトバランスcompoを設定
+// 设置白平衡组合
 int UVCCamera::setWhiteBalanceCompo(int white_balance_compo) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1865,12 +1903,13 @@ int UVCCamera::setWhiteBalanceCompo(int white_balance_compo) {
 	RETURN(ret, int);
 }
 
-// ホワイトバランスcompoの現在値を取得
+// 获取白平衡组合的当前值
 int UVCCamera::getWhiteBalanceCompo() {
 	ENTER();
 	if (mPUSupports & PU_WB_COMPO) {
 		int ret = update_ctrl_values(mDeviceHandle, mWhiteBalanceCompo, uvc_get_white_balance_component);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 当可以正常获取最大值和最小值时
 			uint32_t white_balance_compo;
 			ret = uvc_get_white_balance_component(mDeviceHandle, &white_balance_compo, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1881,8 +1920,7 @@ int UVCCamera::getWhiteBalanceCompo() {
 }
 
 //==================================================================================================
-
-// ガンマ調整
+// 更新gama值
 int UVCCamera::updateGammaLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1892,7 +1930,7 @@ int UVCCamera::updateGammaLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// ガンマを設定
+// 设置gama值
 int UVCCamera::setGamma(int gamma) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1903,12 +1941,13 @@ int UVCCamera::setGamma(int gamma) {
 	RETURN(ret, int);
 }
 
-// ガンマの現在値を取得
+// 获取gama的当前值
 int UVCCamera::getGamma() {
 	ENTER();
 	if (mPUSupports & PU_GAMMA) {
 		int ret = update_ctrl_values(mDeviceHandle, mGamma, uvc_get_gamma);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 正常に最小・最大値を取得出来た時
 			uint16_t value;
 			ret = uvc_get_gamma(mDeviceHandle, &value, UVC_GET_CUR);
 			//LOGI("gamma:%d", ret);
@@ -1931,7 +1970,7 @@ int UVCCamera::updateSaturationLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// 彩度を設定
+// 设定饱和度
 int UVCCamera::setSaturation(int saturation) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1941,12 +1980,13 @@ int UVCCamera::setSaturation(int saturation) {
 	RETURN(ret, int);
 }
 
-// 彩度の現在値を取得
+// 获取饱和度的当前值
 int UVCCamera::getSaturation() {
 	ENTER();
 	if (mPUSupports & PU_SATURATION) {
 		int ret = update_ctrl_values(mDeviceHandle, mSaturation, uvc_get_saturation);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 当可以正常获取最大值和最小值时
 			uint16_t value;
 			ret = uvc_get_saturation(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -1957,8 +1997,7 @@ int UVCCamera::getSaturation() {
 }
 
 //==================================================================================================
-
-// 色相調整
+// 色相调整
 int UVCCamera::updateHueLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1968,7 +2007,7 @@ int UVCCamera::updateHueLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// 色相を設定
+// 设定色调
 int UVCCamera::setHue(int hue) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -1978,7 +2017,7 @@ int UVCCamera::setHue(int hue) {
 	RETURN(ret, int);
 }
 
-// 色相の現在値を取得
+// 获取当前的色相值
 int UVCCamera::getHue() {
 	ENTER();
 	if (mPUSupports & PU_HUE) {
@@ -1994,8 +2033,7 @@ int UVCCamera::getHue() {
 }
 
 //==================================================================================================
-
-// オート色相
+// 自动色调
 int UVCCamera::updateAutoHueLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2005,7 +2043,7 @@ int UVCCamera::updateAutoHueLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// オート色相をon/off
+// 自动色调开/关
 int UVCCamera::setAutoHue(bool autoHue) {
 	ENTER();
 
@@ -2016,7 +2054,7 @@ int UVCCamera::setAutoHue(bool autoHue) {
 	RETURN(r, int);
 }
 
-// オート色相のon/off状態を取得
+// 获取自动色相开/关状态
 bool UVCCamera::getAutoHue() {
 	ENTER();
 	int r = UVC_ERROR_ACCESS;
@@ -2030,8 +2068,7 @@ bool UVCCamera::getAutoHue() {
 }
 
 //==================================================================================================
-
-// 電源周波数によるチラつき補正
+// 通过电源频率进行闪烁校正
 int UVCCamera::updatePowerlineFrequencyLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2041,7 +2078,7 @@ int UVCCamera::updatePowerlineFrequencyLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// 電源周波数によるチラつき補正を設定
+// 通过电源频率设置闪烁校正
 int UVCCamera::setPowerlineFrequency(int frequency) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2061,7 +2098,7 @@ int UVCCamera::setPowerlineFrequency(int frequency) {
 	RETURN(ret, int);
 }
 
-// 電源周波数によるチラつき補正値を取得
+// 根据电源频率获取闪烁校正值
 int UVCCamera::getPowerlineFrequency() {
 	ENTER();
 	if (mPUSupports & PU_POWER_LF) {
@@ -2075,8 +2112,7 @@ int UVCCamera::getPowerlineFrequency() {
 }
 
 //==================================================================================================
-
-// ズーム(abs)調整
+// 缩放（绝对）调整
 int UVCCamera::updateZoomLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2086,7 +2122,7 @@ int UVCCamera::updateZoomLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// ズーム(abs)を設定
+// 设定变焦（绝对）
 int UVCCamera::setZoom(int zoom) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2096,12 +2132,13 @@ int UVCCamera::setZoom(int zoom) {
 	RETURN(ret, int);
 }
 
-// ズーム(abs)の現在値を取得
+// 获取缩放的当前值（绝对）
 int UVCCamera::getZoom() {
 	ENTER();
 	if (mCtrlSupports & CTRL_ZOOM_ABS) {
 		int ret = update_ctrl_values(mDeviceHandle, mZoom, uvc_get_zoom_abs);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 当可以正常获取最大值和最小值时
 			uint16_t value;
 			ret = uvc_get_zoom_abs(mDeviceHandle, &value, UVC_GET_CUR);
 			if (LIKELY(!ret))
@@ -2112,8 +2149,7 @@ int UVCCamera::getZoom() {
 }
 
 //==================================================================================================
-
-// ズーム(相対値)調整
+// 缩放（相对值）调整
 int UVCCamera::updateZoomRelLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2123,7 +2159,7 @@ int UVCCamera::updateZoomRelLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// ズーム(相対値)を設定
+// 设定变焦（相对值）
 int UVCCamera::setZoomRel(int zoom) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2135,12 +2171,13 @@ int UVCCamera::setZoomRel(int zoom) {
 	RETURN(ret, int);
 }
 
-// ズーム(相対値)の現在値を取得
+// 获取缩放的当前值（相对值）
 int UVCCamera::getZoomRel() {
 	ENTER();
 	if (mCtrlSupports & CTRL_ZOOM_REL) {
 		int ret = update_ctrl_values(mDeviceHandle, mZoomRel, uvc_get_zoom_rel);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 当可以正常获取最大值和最小值时
 			int8_t zoom;
 			uint8_t isdigital;
 			uint8_t speed;
@@ -2153,8 +2190,7 @@ int UVCCamera::getZoomRel() {
 }
 
 //==================================================================================================
-
-// digital multiplier調整
+// digital multiplier 更新
 int UVCCamera::updateDigitalMultiplierLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2164,7 +2200,7 @@ int UVCCamera::updateDigitalMultiplierLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// digital multiplierを設定
+// digital multiplier 设置
 int UVCCamera::setDigitalMultiplier(int multiplier) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2175,12 +2211,13 @@ int UVCCamera::setDigitalMultiplier(int multiplier) {
 	RETURN(ret, int);
 }
 
-// digital multiplierの現在値を取得
+// digital multiplier 获取当前值
 int UVCCamera::getDigitalMultiplier() {
 	ENTER();
 	if (mPUSupports & PU_DIGITAL_MULT) {
 		int ret = update_ctrl_values(mDeviceHandle, mMultiplier, uvc_get_digital_multiplier);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {
+			// 当可以正常获取最大值和最小值时
 			uint16_t multiplier;
 			ret = uvc_get_digital_multiplier(mDeviceHandle, &multiplier, UVC_GET_CUR);
 			//LOGI("multiplier:%d", multiplier);
@@ -2192,8 +2229,7 @@ int UVCCamera::getDigitalMultiplier() {
 }
 
 //==================================================================================================
-
-// digital multiplier limit調整
+// digital multiplier limit 更新
 int UVCCamera::updateDigitalMultiplierLimitLimit(int &min, int &max, int &def) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2203,7 +2239,7 @@ int UVCCamera::updateDigitalMultiplierLimitLimit(int &min, int &max, int &def) {
 	RETURN(ret, int);
 }
 
-// digital multiplier limitを設定
+// digital multiplier limit 设置
 int UVCCamera::setDigitalMultiplierLimit(int multiplier_limit) {
 	ENTER();
 	int ret = UVC_ERROR_IO;
@@ -2214,12 +2250,13 @@ int UVCCamera::setDigitalMultiplierLimit(int multiplier_limit) {
 	RETURN(ret, int);
 }
 
-// digital multiplier limitの現在値を取得
+// digital multiplier limit 获取当前值
 int UVCCamera::getDigitalMultiplierLimit() {
 	ENTER();
 	if (mPUSupports & PU_DIGITAL_LIMIT) {
 		int ret = update_ctrl_values(mDeviceHandle, mMultiplierLimit, uvc_get_digital_multiplier_limit);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {	
+			// 当可以正常获取最大值和最小值时
 			uint16_t multiplier_limit;
 			ret = uvc_get_digital_multiplier_limit(mDeviceHandle, &multiplier_limit, UVC_GET_CUR);
 			//LOGI("multiplier_limit:%d", multiplier_limit);
@@ -2231,7 +2268,6 @@ int UVCCamera::getDigitalMultiplierLimit() {
 }
 
 //==================================================================================================
-
 // AnalogVideoStandard
 int UVCCamera::updateAnalogVideoStandardLimit(int &min, int &max, int &def) {
 	ENTER();
@@ -2256,7 +2292,8 @@ int UVCCamera::getAnalogVideoStandard() {
 	ENTER();
 	if (mPUSupports & PU_AVIDEO_STD) {
 		int ret = update_ctrl_values(mDeviceHandle, mAnalogVideoStandard, uvc_get_analog_video_standard);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {
+			// 当可以正常获取最大值和最小值时
 			uint8_t standard;
 			ret = uvc_get_analog_video_standard(mDeviceHandle, &standard, UVC_GET_CUR);
 			//LOGI("standard:%d", standard);
@@ -2268,7 +2305,6 @@ int UVCCamera::getAnalogVideoStandard() {
 }
 
 //==================================================================================================
-
 // AnalogVideoLoackStatus
 int UVCCamera::updateAnalogVideoLockStateLimit(int &min, int &max, int &def) {
 	ENTER();
@@ -2293,7 +2329,8 @@ int UVCCamera::getAnalogVideoLockState() {
 	ENTER();
 	if (mPUSupports & PU_AVIDEO_LOCK) {
 		int ret = update_ctrl_values(mDeviceHandle, mAnalogVideoLockState, uvc_get_analog_video_lockstate);
-		if (LIKELY(!ret)) {	// 正常に最小・最大値を取得出来た時
+		if (LIKELY(!ret)) {
+			// 当可以正常获取最大值和最小值时
 			uint8_t status;
 			ret = uvc_get_analog_video_lockstate(mDeviceHandle, &status, UVC_GET_CUR);
 			//LOGI("status:%d", status);

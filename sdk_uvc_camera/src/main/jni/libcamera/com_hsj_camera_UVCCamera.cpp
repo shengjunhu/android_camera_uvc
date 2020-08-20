@@ -214,7 +214,7 @@ static jint nativeSetPreviewOrientation(JNIEnv *env, jobject thiz,ID_TYPE id_cam
 	ENTER();
 	UVCCamera *camera = reinterpret_cast<UVCCamera *>(id_camera);
 	if (LIKELY(camera)) {
-		//result = camera->setPreviewOrientation(orientation);
+		result = camera->setPreviewOrientation(orientation);
 	}
 	RETURN(result, jint);
 }
@@ -225,7 +225,7 @@ static jint nativeSetPreviewFlip(JNIEnv *env, jobject thiz,ID_TYPE id_camera, ji
 	ENTER();
 	UVCCamera *camera = reinterpret_cast<UVCCamera *>(id_camera);
 	if (LIKELY(camera)) {
-		//result = camera->setPreviewFlip(flipH);
+		result = camera->setPreviewFlip(flipH);
 	}
 	RETURN(result, jint);
 }

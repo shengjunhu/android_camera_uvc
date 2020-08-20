@@ -45,7 +45,7 @@ ext {
             exifinterface               : 'androidx.exifinterface:exifinterface:1.2.0-beta01',
 
             //LeakCanary
-            leakcanary                  : 'com.squareup.leakcanary:leakcanary-android:2.2',
+            leak_canary                  : 'com.squareup.leakcanary:leakcanary-android:2.2',
     ]
 
 }

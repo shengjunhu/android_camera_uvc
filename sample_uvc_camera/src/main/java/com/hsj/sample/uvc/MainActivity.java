@@ -13,9 +13,11 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+
 import com.hsj.camera.USBMonitor;
 import com.hsj.camera.UVCCamera;
 
@@ -73,19 +75,6 @@ public final class MainActivity extends AppCompatActivity implements TextureView
                 cameraHandler.obtainMessage(CAMERA_STOP).sendToTarget());
     }
 
-    public boolean hasPermissions(String... permissions) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
-        if (permissions == null || permissions.length == 0) return true;
-        boolean allGranted = true;
-        for (String permission : permissions) {
-            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                allGranted = false;
-                ActivityCompat.requestPermissions(this, permissions, 0x01);
-            }
-        }
-        return allGranted;
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -114,6 +103,19 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         if (cameraThread != null) {
             cameraThread.quitSafely();
         }
+    }
+
+    private boolean hasPermissions(String... permissions) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
+        if (permissions == null || permissions.length == 0) return true;
+        boolean allGranted = true;
+        for (String permission : permissions) {
+            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                allGranted = false;
+                ActivityCompat.requestPermissions(this, permissions, 0x01);
+            }
+        }
+        return allGranted;
     }
 
     @Override

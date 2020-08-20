@@ -35,3 +35,5 @@ APP_ABI :=  armeabi-v7a arm64-v8a
 #编译debug or release版本
 #APP_OPTIM := debug
 APP_OPTIM := release
+
+NDK_TOOLCHAIN_VERSION := clang

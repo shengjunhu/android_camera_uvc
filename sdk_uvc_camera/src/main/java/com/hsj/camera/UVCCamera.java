@@ -145,10 +145,11 @@ public class UVCCamera {
 
     static {
         try {
+			System.loadLibrary("camera");
             System.loadLibrary("jpeg_turbo_1500");
             System.loadLibrary("usb_100");
             System.loadLibrary("uvc");
-            System.loadLibrary("uvc_camera");
+            System.loadLibrary("yuv");
         } catch (UnsatisfiedLinkError e) {
             e.printStackTrace();
         }
@@ -333,6 +334,32 @@ public class UVCCamera {
         }
     }
 
+    /**
+     * Add by shengjunhu
+     * set Preview Orientation
+     *
+     * @param orientation 0、90、180、270
+     */
+    public int setPreviewOrientation(int orientation) {
+		if (orientation<0||orientation>270) return -2;
+		if (orientation % 90 != 0) return -1;
+        return nativeSetPreviewOrientation(mNativePtr, orientation);
+    }
+
+    /**
+     * Add by shengjunhu
+     * set Preview Flip
+     *
+     * @param flipH 0、1
+     */
+    public int setPreviewFlip(int flipH) {
+        if (flipH == 0 || flipH == 1) {
+            return nativeSetPreviewFlip(mNativePtr, flipH);
+        } else {
+            return -1;
+        }
+    }						   
+
     public List<Size> getSupportedSizeList() {
         final int type = (mCurrentFrameFormat > 0) ? 6 : 4;
         return getSupportedSize(type, mSupportedSize);
@@ -387,31 +414,6 @@ public class UVCCamera {
             } catch (final Exception e) {
                 break;
             }
-        }
-    }
-
-    /**
-     * Add by shengjunhu
-     * set Preview Orientation
-     *
-     * @param orientation 0、90、180、270
-     */
-    public synchronized int setPreviewOrientation(int orientation) {
-        if (orientation % 90 != 0) return -1;
-        return nativeSetPreviewOrientation(mNativePtr, orientation);
-    }
-
-    /**
-     * Add by shengjunhu
-     * set Preview Flip
-     *
-     * @param flipH 0、1
-     */
-    public synchronized int setPreviewFlip(int flipH) {
-        if (flipH == 0 || flipH == 1) {
-            return nativeSetPreviewFlip(mNativePtr, flipH);
-        } else {
-            return -1;
         }
     }
 

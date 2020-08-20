@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include "libyuv.h"
 #include <stdio.h> // FILE
 #include <libusb/libusb.h>
 #include <libuvc/libuvc_config.h>
@@ -105,6 +106,7 @@ enum uvc_frame_format {
 	UVC_FRAME_FORMAT_MJPEG,
 	UVC_FRAME_FORMAT_GRAY8,
 	UVC_FRAME_FORMAT_BY8,
+	UVC_FRAME_FORMAT_ABGR,
 	/** Number of formats understood */
 	UVC_FRAME_FORMAT_COUNT,
 };
@@ -426,9 +428,7 @@ typedef void (uvc_status_callback_t)(enum uvc_status_class status_class,
 /** A callback function to accept button events
  * @ingroup device
  */
-typedef void(uvc_button_callback_t)(int button,
-                                    int state,
-                                    void *user_ptr);
+typedef void(uvc_button_callback_t)(int button, int state,void *user_ptr);
 
 /** Structure representing a UVC device descriptor.
  *
@@ -812,6 +812,11 @@ uvc_error_t uvc_yuyv2rgbx(uvc_frame_t *in, uvc_frame_t *out);		// XXX
 uvc_error_t uvc_uyvy2rgbx(uvc_frame_t *in, uvc_frame_t *out);		// XXX
 uvc_error_t uvc_rgb2rgbx(uvc_frame_t *in, uvc_frame_t *out);		// XXX
 uvc_error_t uvc_any2rgbx(uvc_frame_t *in, uvc_frame_t *out);		// XXX
+
+//hsj
+//rotate=null to not do rotate
+//is_mirror=null to not mirror
+uvc_error_t uvc_yuyv2rotate2mirror2abgr(uvc_frame_t *in, uvc_frame_t *out, int rotate,int mirror);
 
 uvc_error_t uvc_yuyv2yuv420P(uvc_frame_t *in, uvc_frame_t *out);	// XXX
 uvc_error_t uvc_yuyv2yuv420SP(uvc_frame_t *in, uvc_frame_t *out);	// XXX

@@ -1356,9 +1356,9 @@ uvc_error_t uvc_any2yuyv(uvc_frame_t *in, uvc_frame_t *out) {
 	}
 }
 
-/** @brief Convert a frame to yuv420sp
+/**
+ * @brief Convert a frame to yuv420sp
  * @ingroup frame
- *
  * @param in non-yuv420sp frame
  * @param out yuv420sp frame
  */
@@ -1375,9 +1375,9 @@ uvc_error_t uvc_any2yuv420SP(uvc_frame_t *in, uvc_frame_t *out) {
 	return result;
 }
 
-/** @brief Convert a frame to iyuv420sp(NV21)
+/**
+ * @brief Convert a frame to iyuv420sp(NV21)
  * @ingroup frame
- *
  * @param in non-iyuv420SP(NV21) frame
  * @param out iyuv420SP(NV21) frame
  */
@@ -1392,4 +1392,75 @@ uvc_error_t uvc_any2iyuv420SP(uvc_frame_t *in, uvc_frame_t *out) {
 		uvc_free_frame(yuv);
 	}
 	return result;
+}
+
+/**
+ * yuyv2rotate2mirror2abgr
+ * @param in  YUYV frame
+ * @param out ABGR frame
+ * @param rotate YUYV to rotate
+ * @param mirror YUYV to mirror
+ */
+uvc_error_t uvc_yuyv2rotate2mirror2abgr(uvc_frame_t *in, uvc_frame_t *out,int rotate,int mirror) {
+	//无效参数
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
+		return UVC_ERROR_INVALID_PARAM;
+	}
+	//内存错误
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGBX) < 0)){
+		return UVC_ERROR_NO_MEM;
+	}
+	//不旋转不镜像
+	if(rotate==0 && mirror==0){
+		return uvc_any2rgbx(in,out);
+	}
+
+	//宽高旋转
+	out->width = in->height;
+	out->height = in->width;
+	out->frame_format = UVC_FRAME_FORMAT_ABGR;
+	if (out->library_owns_data){
+		out->step = in->width * PIXEL_RGBX;
+	}
+
+	out->sequence = in->sequence;
+	out->capture_time = in->capture_time;
+	out->source = in->source;
+
+	uint8_t *pyuv = in->data;
+	uint8_t *prgbx = out->data;
+
+	int src_width = in -> width;
+	int src_height = in -> height;
+	int crop_x = 0,crop_y = 0;
+	int crop_width = in -> width;
+	int crop_height = in -> height;
+
+	uint8_t *dest = out->data;
+	uint8_t *y = dest;
+	uint8_t *u = dest + out->width * out->height;
+	uint8_t *v = dest + out->width * out->height * 5 / 4;
+
+	uint8_t* yBuffer = malloc(sizeof(uint8_t) * src_width * src_height );
+	uint8_t* uBuffer = malloc(sizeof(uint8_t) * src_width * src_height * 1 / 4);
+	uint8_t* vBuffer = malloc(sizeof(uint8_t) * src_width * src_height * 1 / 4);
+
+	//旋转rotate (宽高发生交换)
+	if(rotate!=0){
+        ConvertToI420(pyuv,src_width*src_height*2,y,src_height,u,src_height >> 1,v,src_height >> 1,
+            crop_x,crop_y,src_width,src_height,crop_width,crop_height,rotate,FOURCC_YUYV);
+	}
+	//镜像
+	if(mirror!=0){
+        I420Mirror(y,src_height,u,src_height >> 1,v,src_height >> 1,yBuffer,src_height,uBuffer,
+            src_height >> 1,vBuffer,src_height >> 1,src_height,src_width);
+	}
+	//转ABGR
+	I420ToABGR(yBuffer,src_height,uBuffer,src_height >> 1,vBuffer,src_height >> 1,
+	    prgbx,src_height*4,src_height,src_width);
+
+	free(yBuffer);
+	free(uBuffer);
+	free(vBuffer);
+	return UVC_SUCCESS;
 }

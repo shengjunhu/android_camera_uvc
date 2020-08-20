@@ -30,8 +30,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     lintOptions {
@@ -68,9 +68,9 @@ dependencies {
     implementation rootProject.ext.dependencies.material
 
     //内存泄漏监控
-    //debugImplementation rootProject.ext.dependencies.leakcanary
+    //debugImplementation rootProject.ext.dependencies.leak_canary
 
     //UVCCamera
-    //implementation project(path: ':sdk_uvc_camera')
-    implementation(name: 'sdk_uvc_camera_v20071316_release', ext: 'aar')
+    implementation project(path: ':sdk_uvc_camera')
+    //implementation(name: 'sdk_uvc_camera_v20082017_release', ext: 'aar')
 }

@@ -115,7 +115,7 @@ class UVCCamera {
 	uvc_device_handle_t *mDeviceHandle;
 	UVCStatusCallback *mStatusCallback;
 	UVCButtonCallback *mButtonCallback;
-	// プレビュー用
+	// 预览
 	UVCPreview *mPreview;
 	uint64_t mCtrlSupports;
 	uint64_t mPUSupports;
@@ -195,6 +195,7 @@ public:
 	int stopPreview();
 	int setCaptureDisplay(ANativeWindow *capture_window);
 
+	//Add by shengjunhu
 	int setPreviewOrientation(int orientation);
 	int setPreviewFlip(int flipH);
 

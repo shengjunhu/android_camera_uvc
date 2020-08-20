@@ -57,8 +57,8 @@
 	#define GET_RAW_DESCRIPTOR
 #endif
 
-#include <assert.h>		// XXX add assert for debugging
-
+// XXX add assert for debugging
+#include <assert.h>
 #include "libuvc/libuvc.h"
 #include "libuvc/libuvc_internal.h"
 
@@ -164,7 +164,8 @@ static enum uvc_frame_format uvc_frame_format_for_guid(uint8_t guid[16]) {
  */
 uvc_error_t uvc_query_stream_ctrl(uvc_device_handle_t *devh,
 		uvc_stream_ctrl_t *ctrl, uint8_t probe, enum uvc_req_code req) {
-	uint8_t buf[48];	// XXX support UVC 1.1 & 1.5
+	// support UVC 1.1 & 1.5
+	uint8_t buf[48];	
 	size_t len;
 	uvc_error_t err;
 
@@ -177,7 +178,7 @@ uvc_error_t uvc_query_stream_ctrl(uvc_device_handle_t *devh,
 		len = 34;
 	else
 		len = 26;
-//	LOGI("bcdUVC:%x,req:0x%02x,probe:%d", bcdUVC, req, probe);
+	//LOGI("bcdUVC:%x,req:0x%02x,probe:%d", bcdUVC, req, probe);
 	/* prepare for a SET transfer */
 	if (req == UVC_SET_CUR) {
 		SHORT_TO_SW(ctrl->bmHint, buf);
@@ -193,14 +194,14 @@ uvc_error_t uvc_query_stream_ctrl(uvc_device_handle_t *devh,
 		INT_TO_DW(ctrl->dwMaxPayloadTransferSize, buf + 22);
 
 		if (len > 26) {	// len == 34
-			// XXX add to support UVC 1.1
+			// add to support UVC 1.1
 			INT_TO_DW(ctrl->dwClockFrequency, buf + 26);
 			buf[30] = ctrl->bmFramingInfo;
 			buf[31] = ctrl->bPreferedVersion;
 			buf[32] = ctrl->bMinVersion;
 			buf[33] = ctrl->bMaxVersion;
 			if (len == 48) {
-				// XXX add to support UVC1.5
+				// add to support UVC1.5
 				buf[34] = ctrl->bUsage;
 				buf[35] = ctrl->bBitDepthLuma;
 				buf[36] = ctrl->bmSettings;
@@ -248,14 +249,14 @@ uvc_error_t uvc_query_stream_ctrl(uvc_device_handle_t *devh,
 		ctrl->dwMaxPayloadTransferSize = DW_TO_INT(buf + 22);
 
 		if (len > 26) {	// len == 34
-			// XXX add to support UVC 1.1
+			// add to support UVC 1.1
 			ctrl->dwClockFrequency = DW_TO_INT(buf + 26);
 			ctrl->bmFramingInfo = buf[30];
 			ctrl->bPreferedVersion = buf[31];
 			ctrl->bMinVersion = buf[32];
 			ctrl->bMaxVersion = buf[33];
 			if (len >= 48) {
-				// XXX add to support UVC1.5
+				// add to support UVC1.5
 				ctrl->bUsage = buf[34];
 				ctrl->bBitDepthLuma = buf[35];
 				ctrl->bmSettings = buf[36];
@@ -369,8 +370,8 @@ uvc_frame_desc_t *uvc_find_frame_desc(uvc_device_handle_t *devh,
 }
 
 static void _uvc_print_streaming_interface_one(uvc_streaming_interface_t *stream_if) {
-//	struct uvc_device_info *parent;
-//	struct uvc_streaming_interface *prev, *next;
+	//	struct uvc_device_info *parent;
+	//	struct uvc_streaming_interface *prev, *next;
 	MARK("bInterfaceNumber:%d", stream_if->bInterfaceNumber);
 	uvc_print_format_desc_one(stream_if->format_descs, NULL);
 	MARK("bEndpointAddress:%d", stream_if->bEndpointAddress);
@@ -378,21 +379,20 @@ static void _uvc_print_streaming_interface_one(uvc_streaming_interface_t *stream
 }
 
 static uvc_error_t _prepare_stream_ctrl(uvc_device_handle_t *devh, uvc_stream_ctrl_t *ctrl) {
-	// XXX some camera may need to call uvc_query_stream_ctrl with UVC_GET_CUR/UVC_GET_MAX/UVC_GET_MIN
+	// some camera may need to call uvc_query_stream_ctrl with UVC_GET_CUR/UVC_GET_MAX/UVC_GET_MIN
 	// before negotiation otherwise stream stall. added by saki
 	uvc_error_t result = uvc_query_stream_ctrl(devh, ctrl, 1, UVC_GET_CUR);	// probe query
-	//Add by shengjunhu 
-	if (LIKELY(result)) {
+	if (LIKELY(!result)) {
 		result = uvc_query_stream_ctrl(devh, ctrl, 1, UVC_GET_MIN);			// probe query
-		if (LIKELY(result)) {
+		if (LIKELY(!result)) {
 			result = uvc_query_stream_ctrl(devh, ctrl, 1, UVC_GET_MAX);		// probe query
-			if (UNLIKELY(!result))
-				LOGE("uvc_query_stream_ctrl:UVC_GET_MAX:err=%d", result);	// XXX 最大値の方を後で取得しないとだめ
+			if (UNLIKELY(result))
+				LOGE("uvc_query_stream_ctrl:UVC_GET_MAX:err=%d", result);	// probe query later
 		} else {
 			LOGE("uvc_query_stream_ctrl:UVC_GET_MIN:err=%d", result);
 		}
 	} else {
-		LOGW("uvc_query_stream_ctrl:UVC_GET_CUR:warn=%d", result);
+		LOGE("uvc_query_stream_ctrl:UVC_GET_CUR:err=%d", result);
 	}
 #if 0
 	if (UNLIKELY(result)) {
@@ -1821,7 +1821,7 @@ uvc_error_t uvc_stream_stop(uvc_stream_handle_t *strmh) {
 					// but this could lead to crash in _uvc_callback
 					// therefore we comment out these lines
 					// and free these objects in _uvc_iso_callback when strmh->running is false
-/*					free(strmh->transfers[i]->buffer);
+					/*free(strmh->transfers[i]->buffer);
 					libusb_free_transfer(strmh->transfers[i]);
 					strmh->transfers[i] = NULL; */
 				}

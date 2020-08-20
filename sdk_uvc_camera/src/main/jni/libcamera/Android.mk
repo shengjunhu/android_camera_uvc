@@ -62,5 +62,5 @@ LOCAL_SRC_FILES := \
 		Parameters.cpp \
 		com_hsj_camera_UVCCamera.cpp
 
-LOCAL_MODULE    := uvc_camera
+LOCAL_MODULE    := camera
 include $(BUILD_SHARED_LIBRARY)

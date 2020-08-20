@@ -6,13 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextureView
-        android:id="@+id/tv"
-        android:layout_width="640px"
-        android:layout_height="480px"
-        android:layout_centerInParent="true"
+    <!--
         android:rotation="90"
         android:scaleY="-1"
+    -->
+
+    <TextureView
+        android:id="@+id/tv"
+        android:layout_width="480px"
+        android:layout_height="640px"
+        android:layout_centerInParent="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

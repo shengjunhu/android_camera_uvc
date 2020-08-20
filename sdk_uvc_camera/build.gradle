@@ -32,8 +32,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     lintOptions {
@@ -55,31 +55,6 @@ android {
     }
 
 }
-
-//tasks.withType(JavaCompile) {
-//    compileTask -> compileTask.dependsOn ndkBuild
-//}
-//
-//String getNdkBuildPath() {
-//    Properties properties = new Properties()
-//    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-//    def ndkBuildingDir = properties.getProperty("ndk.dir")
-//    return ndkBuildingDir + '/ndk-build.cmd'
-//}
-//
-//task ndkBuild(type: Exec, description: 'Compile JNI source via NDK') {
-//    println('executing ndkBuild')
-//    def ndkBuildPath = getNdkBuildPath();
-//    commandLine ndkBuildPath, '-j8', '-C', file('src/main').absolutePath
-//}
-//
-//task ndkClean(type: Exec, description: 'clean JNI libraries') {
-//    println('executing ndkBuild clean')
-//    def ndkBuildPath = getNdkBuildPath();
-//    commandLine ndkBuildPath, 'clean', '-C', file('src/main').absolutePath
-//}
-//
-//clean.dependsOn 'ndkClean'
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])

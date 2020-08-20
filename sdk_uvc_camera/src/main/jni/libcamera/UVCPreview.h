@@ -40,13 +40,17 @@
 #define DEFAULT_BANDWIDTH 1.0f
 
 typedef uvc_error_t (*convFunc_t)(uvc_frame_t *in, uvc_frame_t *out);
+typedef uvc_error_t (*convFunc_t2)(uvc_frame_t *in, uvc_frame_t *out,int rotate,int mirror);
 
-#define PIXEL_FORMAT_RAW 0		// same as PIXEL_FORMAT_YUV
+
+// same as PIXEL_FORMAT_YUV
+#define PIXEL_FORMAT_RAW 0		
 #define PIXEL_FORMAT_YUV 1
 #define PIXEL_FORMAT_RGB565 2
 #define PIXEL_FORMAT_RGBX 3
 #define PIXEL_FORMAT_YUV20SP 4
-#define PIXEL_FORMAT_NV21 5		// YVU420SemiPlanar
+// YVU420SemiPlanar
+#define PIXEL_FORMAT_NV21 5		
 
 // for callback to Java object
 typedef struct {
@@ -63,6 +67,11 @@ private:
 	float requestBandwidth;
 	int frameWidth, frameHeight;
 	int frameMode;
+	
+	//Add by hsj
+	//0/90/180/270,-1/0/1 -> Vertical/Not/Horizontal
+	int previewRotate,previewMirror;
+	
 	size_t frameBytes;
 	pthread_t preview_thread;
 	pthread_mutex_t preview_mutex;
@@ -70,7 +79,7 @@ private:
 	ObjectArray<uvc_frame_t *> previewFrames;
 	int previewFormat;
 	size_t previewBytes;
-//
+	//
 	volatile bool mIsCapturing;
 	//Add by shengjunhu for uvccamera close crash
 	volatile bool mHasCaptureThread;
@@ -78,20 +87,21 @@ private:
 	pthread_t capture_thread;
 	pthread_mutex_t capture_mutex;
 	pthread_cond_t capture_sync;
-	uvc_frame_t *captureQueu;			// keep latest frame
+	// keep latest frame
+	uvc_frame_t *captureQueu;			
 	jobject mFrameCallbackObj;
 	convFunc_t mFrameCallbackFunc;
 	Fields_iframecallback iframecallback_fields;
 	int mPixelFormat;
 	size_t callbackPixelBytes;
-// improve performance by reducing memory allocation
+    // improve performance by reducing memory allocation
 	pthread_mutex_t pool_mutex;
 	ObjectArray<uvc_frame_t *> mFramePool;
 	uvc_frame_t *get_frame(size_t data_bytes);
 	void recycle_frame(uvc_frame_t *frame);
 	void init_pool(size_t data_bytes);
 	void clear_pool();
-//
+	//
 	void clearDisplay();
 	static void uvc_preview_frame_callback(uvc_frame_t *frame, void *vptr_args);
 	void addPreviewFrame(uvc_frame_t *frame);
@@ -100,8 +110,8 @@ private:
 	static void *preview_thread_func(void *vptr_args);
 	int prepare_preview(uvc_stream_ctrl_t *ctrl);
 	void do_preview(uvc_stream_ctrl_t *ctrl);
-	uvc_frame_t *draw_preview_one(uvc_frame_t *frame, ANativeWindow **window, convFunc_t func, int pixelBytes);
-//
+	uvc_frame_t *draw_preview_one(uvc_frame_t *frame, ANativeWindow **window, convFunc_t2 func, int pixelBytes);
+	//
 	void addCaptureFrame(uvc_frame_t *frame);
 	uvc_frame_t *waitCaptureFrame();
 	void clearCaptureFrame();
@@ -117,6 +127,10 @@ public:
 
 	inline const bool isRunning() const;
 	int setPreviewSize(int width, int height, int min_fps, int max_fps, int mode, float bandwidth = 1.0f);
+	//Add by shengjunhu
+	int setPreviewOrientation(int orientation);
+	//Add by shengjunhu
+	int setPreviewFlip(int flipH);
 	int setPreviewDisplay(ANativeWindow *preview_window);
 	int setFrameCallback(JNIEnv *env, jobject frame_callback_obj, int pixel_format);
 	int startPreview();
