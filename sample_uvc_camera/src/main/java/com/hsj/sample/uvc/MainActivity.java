@@ -18,8 +18,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.hsj.camera.Size;
 import com.hsj.camera.USBMonitor;
 import com.hsj.camera.UVCCamera;
+
+import java.util.List;
 
 /**
  * @Author:hsj
@@ -230,7 +233,6 @@ public final class MainActivity extends AppCompatActivity implements TextureView
             rgbCamera.open(blockRGB);
             rgbCamera.setPreviewOrientation(90);
             rgbCamera.setPreviewFlip(1);
-            Log.i(TAG, "rgb camera supported size=" + rgbCamera.getSupportedSize());
             rgbCamera.setPreviewSize(RGB_PREVIEW_WIDTH, RGB_PREVIEW_HEIGHT,
                     UVCCamera.FRAME_FORMAT_MJPEG, 1.0f);
         } catch (UnsupportedOperationException | IllegalArgumentException e) {

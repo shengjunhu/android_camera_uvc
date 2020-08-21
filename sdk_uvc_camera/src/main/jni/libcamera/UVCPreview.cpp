@@ -60,8 +60,11 @@ UVCPreview::UVCPreview(uvc_device_handle_t *devh)
 	frameHeight(DEFAULT_PREVIEW_HEIGHT),
 	frameBytes(DEFAULT_PREVIEW_WIDTH * DEFAULT_PREVIEW_HEIGHT * 2),	// YUYV
 	frameMode(0),
-	previewRotate(0),
-	previewMirror(0),
+
+	//Add by hsj
+	previewRotate(ROTATE_0),
+	previewFlip(FLIP_DEFAULT),
+
 	previewBytes(DEFAULT_PREVIEW_WIDTH * DEFAULT_PREVIEW_HEIGHT * PREVIEW_PIXEL_BYTES),
 	previewFormat(WINDOW_FORMAT_RGBA_8888),
 	mIsRunning(false),
@@ -185,36 +188,34 @@ int UVCPreview::setPreviewSize(int width, int height, int min_fps, int max_fps, 
 	RETURN(result, int);
 }
 
-//Add by shengjunhu for set preview orientation
+//Add by hsj for set preview orientation
 int UVCPreview::setPreviewOrientation(int orientation) {
 	ENTER();
+	LOGI("setPreviewOrientation:%d", orientation);
 	int result = 0;
 	if(isRunning()){
 		result = -1;
-        LOGW("setPreviewOrientation:%d", orientation);	
-	}else if(orientation==0 || orientation==90 || orientation==180 || orientation==270){
+        LOGW("setPreviewOrientation failed:%d", orientation);
+	}else if(orientation==ROTATE_90 || orientation==ROTATE_270
+	            || orientation==ROTATE_0 || orientation==ROTATE_180){
 		previewRotate = orientation;
-		LOGI("setPreviewOrientation:%d", orientation);
 	}else{
 		result = -2;
-        LOGW("setPreviewOrientation:%d", orientation);	
 	}
 	RETURN(result, int);
 }
 
-//Add by shengjunhu for set preview flip
-int UVCPreview::setPreviewFlip(int flipH) {
+//Add by hsj for set preview flip
+int UVCPreview::setPreviewFlip(int flip) {
 	ENTER();
-	LOGI("setPreviewFlip:%d", flipH);
+	LOGI("setPreviewFlip:%d", flip);
 	int result = 0;
 	if(isRunning()){
 		result = -1;
-        LOGW("setPreviewFlip:%d", flipH);	
-	}else if(flipH==-1 || flipH==0 || flipH==1){
-	    previewMirror = flipH;
+	}else if(flip==FLIP_H || flip==FLIP_W || flip==FLIP_DEFAULT){
+	    previewFlip = flip;
 	}else{
 	    result = -2;
-	    LOGW("setPreviewFlip:%d", flipH);
 	}
 	RETURN(result, int);
 }
@@ -354,7 +355,6 @@ void UVCPreview::clearDisplay() {
 		}
 	}
 	pthread_mutex_unlock(&preview_mutex);
-
 	EXIT();
 }
 
@@ -365,11 +365,10 @@ int UVCPreview::startPreview() {
 		mIsRunning = true;
 		pthread_mutex_lock(&preview_mutex);
 		{
-			//Add by shengjunhu for open camera when no mPreviewWindow
+			//Add by hsj for open camera when no mPreviewWindow
 			//if (LIKELY(mPreviewWindow)) {
-			//	result = pthread_create(&preview_thread, NULL, preview_thread_func, (void *)this);
+				result = pthread_create(&preview_thread, NULL, preview_thread_func, (void *)this);
 			//}
-			result = pthread_create(&preview_thread, NULL, preview_thread_func, (void *)this);
 		}
 		pthread_mutex_unlock(&preview_mutex);
 		if (UNLIKELY(result != EXIT_SUCCESS)) {
@@ -391,7 +390,7 @@ int UVCPreview::stopPreview() {
 	if (LIKELY(b)) {
 		mIsRunning = false;
 		pthread_cond_signal(&preview_sync);
-		//Add by shengjunhu for fix crash of stopPreview
+		//Add by hsj for fix crash of stopPreview
 		//pthread_cond_signal(&capture_sync);
 		//if (pthread_join(capture_thread, NULL) != EXIT_SUCCESS) {
 		//	LOGW("UVCPreview::terminate capture thread: pthread_join failed");
@@ -427,6 +426,7 @@ int UVCPreview::stopPreview() {
 //**********************************************************************
 //
 //**********************************************************************
+
 void UVCPreview::uvc_preview_frame_callback(uvc_frame_t *frame, void *vptr_args) {
 	UVCPreview *preview = reinterpret_cast<UVCPreview *>(vptr_args);
 	if UNLIKELY(!preview->isRunning() || !frame || !frame->frame_format || !frame->data || !frame->data_bytes) return;
@@ -459,7 +459,6 @@ void UVCPreview::uvc_preview_frame_callback(uvc_frame_t *frame, void *vptr_args)
 }
 
 void UVCPreview::addPreviewFrame(uvc_frame_t *frame) {
-
 	pthread_mutex_lock(&preview_mutex);
 	if (isRunning() && (previewFrames.size() < MAX_FRAME)) {
 		previewFrames.put(frame);
@@ -490,8 +489,9 @@ uvc_frame_t *UVCPreview::waitPreviewFrame() {
 void UVCPreview::clearPreviewFrame() {
 	pthread_mutex_lock(&preview_mutex);
 	{
-		for (int i = 0; i < previewFrames.size(); i++)
+		for (int i = 0; i < previewFrames.size(); i++){
 			recycle_frame(previewFrames[i]);
+		}
 		previewFrames.clear();
 	}
 	pthread_mutex_unlock(&preview_mutex);
@@ -499,7 +499,6 @@ void UVCPreview::clearPreviewFrame() {
 
 void *UVCPreview::preview_thread_func(void *vptr_args) {
 	int result;
-
 	ENTER();
 	UVCPreview *preview = reinterpret_cast<UVCPreview *>(vptr_args);
 	if (LIKELY(preview)) {
@@ -515,7 +514,6 @@ void *UVCPreview::preview_thread_func(void *vptr_args) {
 
 int UVCPreview::prepare_preview(uvc_stream_ctrl_t *ctrl) {
 	uvc_error_t result;
-
 	ENTER();
 	result = uvc_get_stream_ctrl_format_size_fps(mDeviceHandle, ctrl,
 		!requestMode ? UVC_FRAME_FORMAT_YUYV : UVC_FRAME_FORMAT_MJPEG,
@@ -535,7 +533,7 @@ int UVCPreview::prepare_preview(uvc_stream_ctrl_t *ctrl) {
 			if (LIKELY(mPreviewWindow)) {
 			   //ANativeWindow width、height by hsj
                //ANativeWindow_setBuffersGeometry(mPreviewWindow,frameWidth,frameHeight, previewFormat);
-			    if(previewRotate==90 ||previewRotate==270){
+			    if(previewRotate==ROTATE_90 ||previewRotate==ROTATE_270){
                     ANativeWindow_setBuffersGeometry(mPreviewWindow,frameHeight,frameWidth, previewFormat);
                 }else{
                     ANativeWindow_setBuffersGeometry(mPreviewWindow,frameWidth, frameHeight, previewFormat);
@@ -557,13 +555,12 @@ int UVCPreview::prepare_preview(uvc_stream_ctrl_t *ctrl) {
 
 void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
 	ENTER();
-
 	uvc_frame_t *frame = NULL;
 	uvc_frame_t *frame_mjpeg = NULL;
 	uvc_error_t result = uvc_start_streaming_bandwidth(
 		mDeviceHandle, ctrl, uvc_preview_frame_callback, (void *)this, requestBandwidth, 0);
 
-	//Add by shengjunhu for fix crash of stopPreview
+	//Add by hsj for fix crash of stopPreview
 	mHasCaptureThread = false;
 	if (LIKELY(!result)) {
 		clearPreviewFrame();
@@ -585,10 +582,10 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
 					result = uvc_mjpeg2yuyv(frame_mjpeg, frame);   
 					recycle_frame(frame_mjpeg);
 					if (LIKELY(!result)) {
-						//Add by shengjunu for open camera when no mPreviewWindow
+						//Add by hsj for open camera when no PreviewWindow
 						//frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, 4);
 						if (mPreviewWindow) {
-						    //rotate and mirror
+						    //Add by hsj for rotate and flip
 						    //frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, 4);
 						    frame = draw_preview_one(frame, &mPreviewWindow, uvc_yuyv2rotate2mirror2abgr, 4);
 						}
@@ -603,9 +600,10 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
 			for ( ; LIKELY(isRunning()) ; ) {
 				frame = waitPreviewFrame();
 				if (LIKELY(frame)) {
-					//Add by shengjunu for open camera when no mPreviewWindow
+					//Add by hsj for open camera when no PreviewWindow
 					//frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, 4);
 					if (mPreviewWindow) {
+					    //Add by hsj for rotate and flip
 					    //frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, 4);
 					    frame = draw_preview_one(frame, &mPreviewWindow, uvc_yuyv2rotate2mirror2abgr, 4);
 					}
@@ -624,7 +622,6 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
 	} else {
 		uvc_perror(result, "failed start_streaming");
 	}
-
 	EXIT();
 }
 
@@ -653,7 +650,6 @@ static void copyFrame(const uint8_t *src, uint8_t *dest, const int width, int he
 		dest += stride_dest; src += stride_src;
 	}
 }
-
 
 // transfer specific frame data to the Surface(ANativeWindow)
 int copyToSurface(uvc_frame_t *frame, ANativeWindow **window) {
@@ -700,7 +696,7 @@ uvc_frame_t *UVCPreview::draw_preview_one(uvc_frame_t *frame, ANativeWindow **wi
 		if (convert_func) {
 			converted = get_frame(frame->width * frame->height * pixcelBytes);
 			if LIKELY(converted) {
-				b = convert_func(frame, converted,previewRotate,previewMirror);
+				b = convert_func(frame, converted,previewRotate,previewFlip);
 				if (!b) {
 					pthread_mutex_lock(&preview_mutex);
 					copyToSurface(converted, window);
@@ -737,8 +733,9 @@ int UVCPreview::setCaptureDisplay(ANativeWindow *capture_window) {
 		}
 		if (mCaptureWindow != capture_window) {
 			// release current Surface if already assigned.
-			if (UNLIKELY(mCaptureWindow))
+			if (UNLIKELY(mCaptureWindow)){
 				ANativeWindow_release(mCaptureWindow);
+			}
 			mCaptureWindow = capture_window;
 			// if you use Surface came from MediaCodec#createInputSurface
 			// you could not change window format at least when you use
@@ -770,7 +767,7 @@ void UVCPreview::addCaptureFrame(uvc_frame_t *frame) {
 		captureQueu = frame;
 		pthread_cond_broadcast(&capture_sync);
 	}else{
-	    //Add By shengjunhu
+	    //Add By hsj
 	    recycle_frame(frame);
 	}
 	pthread_mutex_unlock(&capture_mutex);
@@ -801,22 +798,22 @@ uvc_frame_t *UVCPreview::waitCaptureFrame() {
 void UVCPreview::clearCaptureFrame() {
 	pthread_mutex_lock(&capture_mutex);
 	{
-		if (captureQueu)
+		if (captureQueu){
 			recycle_frame(captureQueu);
+		}
 		captureQueu = NULL;
 	}
 	pthread_mutex_unlock(&capture_mutex);
 }
 
-//======================================================================
+//==================================================================================================
+
 /*
  * thread function
  * @param vptr_args pointer to UVCPreview instance
  */
-// static
 void *UVCPreview::capture_thread_func(void *vptr_args) {
 	int result;
-
 	ENTER();
 	UVCPreview *preview = reinterpret_cast<UVCPreview *>(vptr_args);
 	if (LIKELY(preview)) {
@@ -838,9 +835,7 @@ void *UVCPreview::capture_thread_func(void *vptr_args) {
  * the actual function for capturing
  */
 void UVCPreview::do_capture(JNIEnv *env) {
-
 	ENTER();
-
 	clearCaptureFrame();
 	callbackPixelFormatChanged();
 	for (; isRunning() ;) {
@@ -851,17 +846,15 @@ void UVCPreview::do_capture(JNIEnv *env) {
 			do_capture_idle_loop(env);
 		}
 		pthread_cond_broadcast(&capture_sync);
-	}	// end of for (; isRunning() ;)
+	}
 	EXIT();
 }
 
 void UVCPreview::do_capture_idle_loop(JNIEnv *env) {
 	ENTER();
-	
 	for (; isRunning() && isCapturing() ;) {
 		do_capture_callback(env, waitCaptureFrame());
 	}
-	
 	EXIT();
 }
 
@@ -870,11 +863,9 @@ void UVCPreview::do_capture_idle_loop(JNIEnv *env) {
  */
 void UVCPreview::do_capture_surface(JNIEnv *env) {
 	ENTER();
-
 	uvc_frame_t *frame = NULL;
 	uvc_frame_t *converted = NULL;
 	char *local_picture_path;
-
 	for (; isRunning() && isCapturing() ;) {
 		frame = waitCaptureFrame();
 		if (LIKELY(frame)) {
@@ -902,7 +893,6 @@ void UVCPreview::do_capture_surface(JNIEnv *env) {
 		ANativeWindow_release(mCaptureWindow);
 		mCaptureWindow = NULL;
 	}
-
 	EXIT();
 }
 
@@ -911,7 +901,6 @@ void UVCPreview::do_capture_surface(JNIEnv *env) {
  */
 void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
 	ENTER();
-
 	if (LIKELY(frame)) {
 		uvc_frame_t *callback_frame = frame;
 		if (mFrameCallbackObj) {
@@ -931,7 +920,7 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
 				}
 			}
 			jobject buf = env->NewDirectByteBuffer(callback_frame->data, callbackPixelBytes);
-			//Add by shengjunhu for NullpointerException
+			//Add by hsj for NullPointerException
 			if(iframecallback_fields.onFrame) {
 			    env->CallVoidMethod(mFrameCallbackObj, iframecallback_fields.onFrame, buf);
 			}

@@ -78,7 +78,7 @@
 #define PU_CONTRAST_AUTO	0x040000	// D18: Contrast, Auto
 
 typedef struct control_value {
-	int res;	// unused
+	int res;// unused
 	int min;
 	int max;
 	int def;
@@ -195,9 +195,9 @@ public:
 	int stopPreview();
 	int setCaptureDisplay(ANativeWindow *capture_window);
 
-	//Add by shengjunhu
+	//Add by hsj
 	int setPreviewOrientation(int orientation);
-	int setPreviewFlip(int flipH);
+	int setPreviewFlip(int flip);
 
 	int getCtrlSupports(uint64_t *supports);
 	int getProcSupports(uint64_t *supports);

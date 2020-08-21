@@ -42,7 +42,6 @@
 typedef uvc_error_t (*convFunc_t)(uvc_frame_t *in, uvc_frame_t *out);
 typedef uvc_error_t (*convFunc_t2)(uvc_frame_t *in, uvc_frame_t *out,int rotate,int mirror);
 
-
 // same as PIXEL_FORMAT_YUV
 #define PIXEL_FORMAT_RAW 0		
 #define PIXEL_FORMAT_YUV 1
@@ -50,7 +49,17 @@ typedef uvc_error_t (*convFunc_t2)(uvc_frame_t *in, uvc_frame_t *out,int rotate,
 #define PIXEL_FORMAT_RGBX 3
 #define PIXEL_FORMAT_YUV20SP 4
 // YVU420SemiPlanar
-#define PIXEL_FORMAT_NV21 5		
+#define PIXEL_FORMAT_NV21 5
+
+//Add by hsj for preview rotate
+#define ROTATE_0	        0
+#define ROTATE_90	        90
+#define ROTATE_180	        180
+#define ROTATE_270	        270
+//Add by hsj for preview flip
+#define FLIP_H	            1
+#define FLIP_W	            -1
+#define FLIP_DEFAULT	    0
 
 // for callback to Java object
 typedef struct {
@@ -67,10 +76,9 @@ private:
 	float requestBandwidth;
 	int frameWidth, frameHeight;
 	int frameMode;
-	
 	//Add by hsj
 	//0/90/180/270,-1/0/1 -> Vertical/Not/Horizontal
-	int previewRotate,previewMirror;
+	int previewRotate,previewFlip;
 	
 	size_t frameBytes;
 	pthread_t preview_thread;

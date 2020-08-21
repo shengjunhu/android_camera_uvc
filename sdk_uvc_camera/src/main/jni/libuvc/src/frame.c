@@ -52,6 +52,7 @@
 #include "libuvc/libuvc_internal.h"
 
 #define USE_STRIDE 1
+
 /** @internal */
 uvc_error_t uvc_ensure_frame_size(uvc_frame_t *frame, size_t need_bytes) {
 	if LIKELY(frame->library_owns_data) {
@@ -59,12 +60,14 @@ uvc_error_t uvc_ensure_frame_size(uvc_frame_t *frame, size_t need_bytes) {
 			frame->actual_bytes = frame->data_bytes = need_bytes;	// XXX
 			frame->data = realloc(frame->data, frame->data_bytes);
 		}
-		if (UNLIKELY(!frame->data || !need_bytes))
-			return UVC_ERROR_NO_MEM;
+		if (UNLIKELY(!frame->data || !need_bytes)){
+		    return UVC_ERROR_NO_MEM;
+		 }
 		return UVC_SUCCESS;
 	} else {
-		if (UNLIKELY(!frame->data || frame->data_bytes < need_bytes))
-			return UVC_ERROR_NO_MEM;
+		if (UNLIKELY(!frame->data || frame->data_bytes < need_bytes)) {
+		    return UVC_ERROR_NO_MEM;
+		}
 		return UVC_SUCCESS;
 	}
 }
@@ -76,29 +79,26 @@ uvc_error_t uvc_ensure_frame_size(uvc_frame_t *frame, size_t need_bytes) {
  * @return New frame, or NULL on error
  */
 uvc_frame_t *uvc_allocate_frame(size_t data_bytes) {
-	uvc_frame_t *frame = malloc(sizeof(*frame));	// FIXME using buffer pool is better performance(5-30%) than directory use malloc everytime.
-
-	if (UNLIKELY(!frame))
-		return NULL;
-
+    // FIXME using buffer pool is better performance(5-30%) than directory use malloc everytime.
+	uvc_frame_t *frame = malloc(sizeof(*frame));
+	if (UNLIKELY(!frame)){
+	    return NULL;
+	}
 #ifndef __ANDROID__
 	// XXX in many case, it is not neccesary to clear because all fields are set before use
 	// therefore we remove this to improve performace, but be care not to forget to set fields before use
 	memset(frame, 0, sizeof(*frame));	// bzero(frame, sizeof(*frame)); // bzero is deprecated
 #endif
 //	frame->library_owns_data = 1;	// XXX moved to lower
-
 	if (LIKELY(data_bytes > 0)) {
 		frame->library_owns_data = 1;
 		frame->actual_bytes = frame->data_bytes = data_bytes;	// XXX
 		frame->data = malloc(data_bytes);
-
 		if (UNLIKELY(!frame->data)) {
 			free(frame);
 			return NULL ;
 		}
 	}
-
 	return frame;
 }
 
@@ -108,9 +108,9 @@ uvc_frame_t *uvc_allocate_frame(size_t data_bytes) {
  * @param frame Frame to destroy
  */
 void uvc_free_frame(uvc_frame_t *frame) {
-	if ((frame->data_bytes > 0) && frame->library_owns_data)
+	if ((frame->data_bytes > 0) && frame->library_owns_data){
 		free(frame->data);
-
+	}
 	free(frame);
 }
 
@@ -125,14 +125,16 @@ static inline unsigned char sat(int i) {
  * @param out Duplicate frame
  */
 uvc_error_t uvc_duplicate_frame(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->data_bytes) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->data_bytes) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = in->frame_format;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->step;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -222,23 +224,27 @@ uvc_error_t uvc_duplicate_frame(uvc_frame_t *in, uvc_frame_t *out) {
 	RGB2RGBX_2(prgb, prgbx, ax, bx) \
 	RGB2RGBX_2(prgb, prgbx, ax + PIXEL2_RGB, bx + PIXEL2_RGBX);
 
-/** @brief Convert a frame from RGB888 to RGBX8888
+/**
+ * @brief Convert a frame from RGB888 to RGBX8888
  * @ingroup frame
  * @param ini RGB888 frame
  * @param out RGBX8888 frame
  */
 uvc_error_t uvc_rgb2rgbx(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_RGB))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_RGB)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGBX) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGBX) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_RGBX;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_RGBX;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -304,23 +310,27 @@ uvc_error_t uvc_rgb2rgbx(uvc_frame_t *in, uvc_frame_t *out) {
 	RGB2RGB565_2(prgb, prgb565, ax, bx) \
 	RGB2RGB565_2(prgb, prgb565, ax + PIXEL2_RGB, bx + PIXEL2_RGB565);
 
-/** @brief Convert a frame from RGB888 to RGB565
+/**
+ * @brief Convert a frame from RGB888 to RGB565
  * @ingroup frame
  * @param ini RGB888 frame
  * @param out RGB565 frame
  */
 uvc_error_t uvc_rgb2rgb565(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_RGB))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_RGB)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB565) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB565) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_RGB565;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_RGB565;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -406,24 +416,28 @@ uvc_error_t uvc_rgb2rgb565(uvc_frame_t *in, uvc_frame_t *out) {
 	IYUYV2RGB_2(pyuv, prgb, ax, bx) \
 	IYUYV2RGB_2(pyuv, prgb, ax + PIXEL2_YUYV, bx + PIXEL2_RGB)
 
-/** @brief Convert a frame from YUYV to RGB888
+/**
+ * @brief Convert a frame from YUYV to RGB888
  * @ingroup frame
  *
  * @param in YUYV frame
  * @param out RGB888 frame
  */
 uvc_error_t uvc_yuyv2rgb(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_RGB;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_RGB;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -471,23 +485,27 @@ uvc_error_t uvc_yuyv2rgb(uvc_frame_t *in, uvc_frame_t *out) {
 	return UVC_SUCCESS;
 }
 
-/** @brief Convert a frame from YUYV to RGB565
+/**
+ * @brief Convert a frame from YUYV to RGB565
  * @ingroup frame
  * @param ini YUYV frame
  * @param out RGB565 frame
  */
 uvc_error_t uvc_yuyv2rgb565(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB565) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB565) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_RGB565;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_RGB565;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -567,23 +585,27 @@ uvc_error_t uvc_yuyv2rgb565(uvc_frame_t *in, uvc_frame_t *out) {
 	IYUYV2RGBX_2(pyuv, prgbx, ax, bx) \
 	IYUYV2RGBX_2(pyuv, prgbx, ax + PIXEL2_YUYV, bx + PIXEL2_RGBX);
 
-/** @brief Convert a frame from YUYV to RGBX8888
+/**
+ * @brief Convert a frame from YUYV to RGBX8888
  * @ingroup frame
  * @param ini YUYV frame
  * @param out RGBX8888 frame
  */
 uvc_error_t uvc_yuyv2rgbx(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGBX) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGBX) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_RGBX;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_RGBX;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -656,24 +678,28 @@ uvc_error_t uvc_yuyv2rgbx(uvc_frame_t *in, uvc_frame_t *out) {
 	IYUYV2BGR_2(pyuv, pbgr, ax, bx) \
 	IYUYV2BGR_2(pyuv, pbgr, ax + PIXEL2_YUYV, bx + PIXEL2_BGR)
 
-/** @brief Convert a frame from YUYV to BGR888
+/**
+ * @brief Convert a frame from YUYV to BGR888
  * @ingroup frame
  *
  * @param in YUYV frame
  * @param out BGR888 frame
  */
 uvc_error_t uvc_yuyv2bgr(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_BGR) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_BGR) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_BGR;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_BGR;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -746,23 +772,27 @@ uvc_error_t uvc_yuyv2bgr(uvc_frame_t *in, uvc_frame_t *out) {
 	IUYVY2RGB_2(pyuv, prgb, ax, bx) \
 	IUYVY2RGB_2(pyuv, prgb, ax + 4, bx + 6)
 
-/** @brief Convert a frame from UYVY to RGB888
+/**
+ * @brief Convert a frame from UYVY to RGB888
  * @ingroup frame
  * @param ini UYVY frame
  * @param out RGB888 frame
  */
 uvc_error_t uvc_uyvy2rgb(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_UYVY))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_UYVY)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_RGB;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_RGB;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -810,23 +840,27 @@ uvc_error_t uvc_uyvy2rgb(uvc_frame_t *in, uvc_frame_t *out) {
 	return UVC_SUCCESS;
 }
 
-/** @brief Convert a frame from UYVY to RGB565
+/**
+ * @brief Convert a frame from UYVY to RGB565
  * @ingroup frame
  * @param ini UYVY frame
  * @param out RGB565 frame
  */
 uvc_error_t uvc_uyvy2rgb565(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_UYVY))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_UYVY)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB565) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGB565) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_RGB565;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_RGB565;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -906,23 +940,27 @@ uvc_error_t uvc_uyvy2rgb565(uvc_frame_t *in, uvc_frame_t *out) {
 	IUYVY2RGBX_2(pyuv, prgbx, ax, bx) \
 	IUYVY2RGBX_2(pyuv, prgbx, ax + PIXEL2_UYVY, bx + PIXEL2_RGBX)
 
-/** @brief Convert a frame from UYVY to RGBX8888
+/**
+ * @brief Convert a frame from UYVY to RGBX8888
  * @ingroup frame
  * @param ini UYVY frame
  * @param out RGBX8888 frame
  */
 uvc_error_t uvc_uyvy2rgbx(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_UYVY))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_UYVY)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGBX) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGBX) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_RGBX;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_RGBX;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -995,23 +1033,27 @@ uvc_error_t uvc_uyvy2rgbx(uvc_frame_t *in, uvc_frame_t *out) {
 	IUYVY2BGR_2(pyuv, pbgr, ax, bx) \
 	IUYVY2BGR_2(pyuv, pbgr, ax + PIXEL2_UYVY, bx + PIXEL2_BGR)
 
-/** @brief Convert a frame from UYVY to BGR888
+/**
+ * @brief Convert a frame from UYVY to BGR888
  * @ingroup frame
  * @param ini UYVY frame
  * @param out BGR888 frame
  */
 uvc_error_t uvc_uyvy2bgr(uvc_frame_t *in, uvc_frame_t *out) {
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_UYVY))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_UYVY)){
 		return UVC_ERROR_INVALID_PARAM;
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_BGR) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_BGR) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	out->width = in->width;
 	out->height = in->height;
 	out->frame_format = UVC_FRAME_FORMAT_BGR;
-	if (out->library_owns_data)
+	if (out->library_owns_data){
 		out->step = in->width * PIXEL_BGR;
+	}
 	out->sequence = in->sequence;
 	out->capture_time = in->capture_time;
 	out->source = in->source;
@@ -1060,14 +1102,14 @@ uvc_error_t uvc_uyvy2bgr(uvc_frame_t *in, uvc_frame_t *out) {
 }
 
 int uvc_yuyv2yuv420P(uvc_frame_t *in, uvc_frame_t *out) {
-
 	ENTER();
-	
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
 		RETURN(UVC_ERROR_INVALID_PARAM, uvc_error_t);
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, (in->width * in->height * 3) / 2) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, (in->width * in->height * 3) / 2) < 0)){
 		RETURN(UVC_ERROR_NO_MEM, uvc_error_t);
+	}
 
 	const uint8_t *src = in->data;
 	uint8_t *dest = out->data;
@@ -1102,16 +1144,17 @@ int uvc_yuyv2yuv420P(uvc_frame_t *in, uvc_frame_t *out) {
 	RETURN(0, int);
 }
 
-//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
+
 int uvc_yuyv2iyuv420P(uvc_frame_t *in, uvc_frame_t *out) {
-
 	ENTER();
-	
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
 		RETURN(UVC_ERROR_INVALID_PARAM, uvc_error_t);
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, (in->width * in->height * 3) / 2) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, (in->width * in->height * 3) / 2) < 0)){
 		RETURN(UVC_ERROR_NO_MEM, uvc_error_t);
+	}
 
 	const uint8_t *src = in->data;
 	uint8_t *dest = out->data;
@@ -1148,12 +1191,12 @@ int uvc_yuyv2iyuv420P(uvc_frame_t *in, uvc_frame_t *out) {
 
 uvc_error_t uvc_yuyv2yuv420SP(uvc_frame_t *in, uvc_frame_t *out) {
 	ENTER();
-	
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
 		RETURN(UVC_ERROR_INVALID_PARAM, uvc_error_t);
-
-	if (UNLIKELY(uvc_ensure_frame_size(out, (in->width * in->height * 3) / 2) < 0))
+	}
+	if (UNLIKELY(uvc_ensure_frame_size(out, (in->width * in->height * 3) / 2) < 0)){
 		RETURN(UVC_ERROR_NO_MEM, uvc_error_t);
+	}
 
 	const uint8_t *src = in->data;
 	uint8_t *dest = out->data;
@@ -1187,18 +1230,18 @@ uvc_error_t uvc_yuyv2yuv420SP(uvc_frame_t *in, uvc_frame_t *out) {
 			yuv += 8;	// (1pixel=2bytes)x4pixels=8bytes
 		}
 	}
-	
 	RETURN(UVC_SUCCESS, uvc_error_t);
 }
 
 uvc_error_t uvc_yuyv2iyuv420SP(uvc_frame_t *in, uvc_frame_t *out) {
 	ENTER();
-	
-	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV))
+	if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)){
 		RETURN(UVC_ERROR_INVALID_PARAM, uvc_error_t);
+	}
 
-	if (UNLIKELY(uvc_ensure_frame_size(out, (in->width * in->height * 3) / 2) < 0))
+	if (UNLIKELY(uvc_ensure_frame_size(out, (in->width * in->height * 3) / 2) < 0)){
 		return UVC_ERROR_NO_MEM;
+	}
 
 	const uint8_t *src = in->data;
 	uint8_t *dest =out->data;
@@ -1232,18 +1275,17 @@ uvc_error_t uvc_yuyv2iyuv420SP(uvc_frame_t *in, uvc_frame_t *out) {
 			yuv += 8;	// (1pixel=2bytes)x4pixels=8bytes
 		}
 	}
-	
 	RETURN(UVC_SUCCESS, uvc_error_t);
 }
 
-/** @brief Convert a frame to RGB565
+/**
+ * @brief Convert a frame to RGB565
  * @ingroup frame
  *
  * @param in non-RGB565 frame
  * @param out RGB565 frame
  */
 uvc_error_t uvc_any2rgb565(uvc_frame_t *in, uvc_frame_t *out) {
-
 	switch (in->frame_format) {
 #ifdef LIBUVC_HAS_JPEG
 	case UVC_FRAME_FORMAT_MJPEG:
@@ -1262,14 +1304,14 @@ uvc_error_t uvc_any2rgb565(uvc_frame_t *in, uvc_frame_t *out) {
 	}
 }
 
-/** @brief Convert a frame to RGB888
+/**
+ * @brief Convert a frame to RGB888
  * @ingroup frame
  *
  * @param in non-RGB888 frame
  * @param out RGB888 frame
  */
 uvc_error_t uvc_any2rgb(uvc_frame_t *in, uvc_frame_t *out) {
-
 	switch (in->frame_format) {
 #ifdef LIBUVC_HAS_JPEG
 	case UVC_FRAME_FORMAT_MJPEG:
@@ -1286,14 +1328,14 @@ uvc_error_t uvc_any2rgb(uvc_frame_t *in, uvc_frame_t *out) {
 	}
 }
 
-/** @brief Convert a frame to BGR888
+/**
+ * @brief Convert a frame to BGR888
  * @ingroup frame
  *
  * @param in non-BGR888 frame
  * @param out BGR888 frame
  */
 uvc_error_t uvc_any2bgr(uvc_frame_t *in, uvc_frame_t *out) {
-
 	switch (in->frame_format) {
 #ifdef LIBUVC_HAS_JPEG
 	case UVC_FRAME_FORMAT_MJPEG:
@@ -1310,14 +1352,14 @@ uvc_error_t uvc_any2bgr(uvc_frame_t *in, uvc_frame_t *out) {
 	}
 }
 
-/** @brief Convert a frame to RGBX8888
+/**
+ * @brief Convert a frame to RGBX8888
  * @ingroup frame
  *
  * @param in non-rgbx frame
  * @param out rgbx frame
  */
 uvc_error_t uvc_any2rgbx(uvc_frame_t *in, uvc_frame_t *out) {
-
 	switch (in->frame_format) {
 #ifdef LIBUVC_HAS_JPEG
 	case UVC_FRAME_FORMAT_MJPEG:
@@ -1336,14 +1378,14 @@ uvc_error_t uvc_any2rgbx(uvc_frame_t *in, uvc_frame_t *out) {
 	}
 }
 
-/** @brief Convert a frame to yuyv
+/**
+ * @brief Convert a frame to yuyv
  * @ingroup frame
  *
  * @param in non-yuyv frame
  * @param out yuyv frame
  */
 uvc_error_t uvc_any2yuyv(uvc_frame_t *in, uvc_frame_t *out) {
-
 	switch (in->frame_format) {
 #ifdef LIBUVC_HAS_JPEG
 	case UVC_FRAME_FORMAT_MJPEG:
@@ -1359,6 +1401,7 @@ uvc_error_t uvc_any2yuyv(uvc_frame_t *in, uvc_frame_t *out) {
 /**
  * @brief Convert a frame to yuv420sp
  * @ingroup frame
+ *
  * @param in non-yuv420sp frame
  * @param out yuv420sp frame
  */
@@ -1378,6 +1421,7 @@ uvc_error_t uvc_any2yuv420SP(uvc_frame_t *in, uvc_frame_t *out) {
 /**
  * @brief Convert a frame to iyuv420sp(NV21)
  * @ingroup frame
+ *
  * @param in non-iyuv420SP(NV21) frame
  * @param out iyuv420SP(NV21) frame
  */
@@ -1410,6 +1454,7 @@ uvc_error_t uvc_yuyv2rotate2mirror2abgr(uvc_frame_t *in, uvc_frame_t *out,int ro
 	if (UNLIKELY(uvc_ensure_frame_size(out, in->width * in->height * PIXEL_RGBX) < 0)){
 		return UVC_ERROR_NO_MEM;
 	}
+	// >> TODO need implement >>
 	//不旋转不镜像
 	if(rotate==0 && mirror==0){
 		return uvc_any2rgbx(in,out);
