@@ -3,13 +3,11 @@ android sample of uvccamera,
 developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCamera)
 
 ### Image
-<center>
-    ![](doc/file/screenshot_1.png)
-    ![](doc/file/screenshot_2.png)
-    ![](doc/file/screenshot_3.png)
-</center>
+<img src="doc/file/screenshot_1.png" width="200" height="320"/>
+<img src="doc/file/screenshot_2.png" width="200" height="320"/>
+<img src="doc/file/screenshot_3.png" width="200" height="320"/>
 
- <figure class="third">
+<figure class="third">
     <img src="doc/file/screenshot_1.png">
     <img src="doc/file/screenshot_2.png">
     <img src="doc/file/screenshot_3.png">
