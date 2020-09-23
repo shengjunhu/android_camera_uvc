@@ -3,11 +3,11 @@ android sample of uvccamera,
 developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCamera)
 
 ### Image
-<figure class="third">
+<center class="third">
    <img src="doc/file/screenshot_1.png" width="200" height="320"/>
    <img src="doc/file/screenshot_2.png" width="200" height="320"/>
    <img src="doc/file/screenshot_3.png" width="200" height="320"/>
-</figure>
+</center>
 
 ### APK file
 ![LOGO](doc/file/android_logo.png)
