@@ -4,8 +4,8 @@ developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCam
 
 ### Image
 <figure class="half">
-    <img src="doc/file/screenshot_1.png" title="screenshot_1">
-    <img src="doc/file/screenshot_2.png" title="screenshot_2">
+    <img src="doc/file/screenshot_1.png">
+    <img src="doc/file/screenshot_2.png">
 </figure>
 
 ### APK file
