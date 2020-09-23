@@ -3,32 +3,30 @@ android sample of uvccamera,
 developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCamera)
 
 ### Image
-<center class="third">
-   <img src="doc/file/screenshot_1.png" width="200" height="320"/>
-   <img src="doc/file/screenshot_2.png" width="200" height="320"/>
-   <img src="doc/file/screenshot_3.png" width="200" height="320"/>
+<center class="half">
+   <img src="doc/file/screenshot_1.png" width="200"/><img src="doc/file/screenshot_2.png" width="200"/><img src="doc/file/screenshot_3.png" width="200"/>
 </center>
 
-### APK file
-![LOGO](doc/file/android_logo.png)
-[APK](doc/file/UsbCamera_v20092316.apk)
+### Sample
+[![APK]](doc/file/UsbCamera_v20092316.apk)
+[APK]:doc/file/android_logo.png
 
 ### Add Function
 
 * 1-Add UVCCamera API with previewRotate(int rotate);
-```
-public boolean setPreviewRotate(@PREVIEW_ROTATE int rotate)
+```java
+public boolean setPreviewRotate(@PREVIEW_ROTATEint rotate)
 ```
 
 * 2-Add UVCCamera API with previewFlip(int flipH);
-```
+```java
 public boolean setPreviewFlip(@PREVIEW_FLIP int flip)
 ```
 
 ### Fix bug
 
 * 1-fix memory leak on addCaptureFrame(uvc_frame_t *frame) of UVCpreview.cpp
-```
+```cpp
 void UVCPreview::addCaptureFrame(uvc_frame_t *frame) {
 	pthread_mutex_lock(&capture_mutex);
 	if (LIKELY(isRunning())) {
@@ -47,7 +45,7 @@ void UVCPreview::addCaptureFrame(uvc_frame_t *frame) {
 ```
 
 * 2-fix end of pthread_join() for stopPreview() of UVCPreview.cpp
-```
+```cpp
 int UVCPreview::stopPreview() {
     bool b = isRunning();
     if (LIKELY(b)) {
@@ -70,7 +68,7 @@ int UVCPreview::stopPreview() {
 ```
 
 * 3-fix NullPointerException for do_capture_callback() of UVCPreview.cpp
-```
+```cpp
 void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
     ...
     //mFrameCallbackObj or iframecallback_fields.onFrame maybe null
