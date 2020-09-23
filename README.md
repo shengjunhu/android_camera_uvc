@@ -4,9 +4,12 @@ developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCam
 
 ### Image
 <figure class="half">
-    <img src="doc/file/screenshot_1.png">
-    <img src="doc/file/screenshot_2.png">
+    <img src="doc/file/screenshot_1.png" title="screenshot_1">
+    <img src="doc/file/screenshot_2.png" title="screenshot_2">
 </figure>
+
+### APK file
+![LOGO](doc/file/android_logo.png) [APK](doc/file/UsbCamera_v20092316.apk)
 
 ### Add Function
 
@@ -77,8 +80,6 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
     ...
 }
 ```
-
-[APK](doc/file/UsbCamera_v20092316.apk)
 
 ### About Author:
 * Author: shengjunhu
