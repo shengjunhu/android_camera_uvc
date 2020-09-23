@@ -9,13 +9,11 @@ developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCam
     ![](doc/file/screenshot_3.png)
 </center>
 
-<center>
-    <figure class="third">
-        <img src="doc/file/screenshot_1.png">
-        <img src="doc/file/screenshot_2.png">
-        <img src="doc/file/screenshot_3.png">
-    </figure>
-</center>
+ <figure class="third">
+    <img src="doc/file/screenshot_1.png">
+    <img src="doc/file/screenshot_2.png">
+    <img src="doc/file/screenshot_3.png">
+</figure>
 
 ### APK file
 ![LOGO](doc/file/android_logo.png)
