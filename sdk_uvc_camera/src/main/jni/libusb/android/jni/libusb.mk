@@ -17,11 +17,13 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-#
+
 ######################################################################
 # libusb.a
 ######################################################################
-LOCAL_PATH			:= $(call my-dir)/../..
+
+LOCAL_PATH := $(call my-dir)/../..
+
 include $(CLEAR_VARS)
 
 # changed linux_usbfs.c => android_usbfs.c
@@ -61,16 +63,21 @@ LOCAL_EXPORT_LDLIBS += -llog
 LOCAL_ARM_MODE := arm
 
 LOCAL_MODULE := libusb_100_static
+
 include $(BUILD_STATIC_LIBRARY)
 
 ######################################################################
 # libusb100.so
 ######################################################################
+
 include $(CLEAR_VARS)
+
 LOCAL_MODULE_TAGS := optional
+
 LOCAL_EXPORT_LDLIBS += -llog
 
 LOCAL_WHOLE_STATIC_LIBRARIES = libusb_100_static
 
 LOCAL_MODULE := usb_100
+
 include $(BUILD_SHARED_LIBRARY)

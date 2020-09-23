@@ -19,27 +19,13 @@ public class UVCCamera {
 
     private static final String TAG = "UVCCamera";
     private static final String DEFAULT_USBFS = "/dev/bus/usb";
-
-    //call method result status
-    public static final int ACTION_SUCCESS = 0;
-    public static final int ACTION_ERROR = -1;
-    //preview oritation
-    public static final int ROTATE_0 = 0;
-    public static final int ROTATE_90 = 90;
-    public static final int ROTATE_180 = 180;
-    public static final int ROTATE_270 = 270;
-    //preview flip
-    public static final int FLIP_H = 1;
-    public static final int FLIP_DEFAULT = 0;
-    public static final int FLIP_W = -1;
-    //preview width and height
+    //Preview width and height
     public static final int DEFAULT_PREVIEW_WIDTH = 640;
     public static final int DEFAULT_PREVIEW_HEIGHT = 480;
     public static final int DEFAULT_PREVIEW_MODE = 0;
     public static final int DEFAULT_PREVIEW_MIN_FPS = 1;
     public static final int DEFAULT_PREVIEW_MAX_FPS = 30;
     public static final float DEFAULT_BANDWIDTH = 1.0f;
-
     //Frame Format
     public static final int FRAME_FORMAT_YUYV = 0;
     public static final int FRAME_FORMAT_MJPEG = 1;
@@ -48,8 +34,8 @@ public class UVCCamera {
     public static final int PIXEL_FORMAT_YUV = 1;
     public static final int PIXEL_FORMAT_RGB565 = 2;
     public static final int PIXEL_FORMAT_RGBX = 3;
-    public static final int PIXEL_FORMAT_YUV420SP = 4;
-    public static final int PIXEL_FORMAT_NV21 = 5;             //YVU420SemiPlanar
+    public static final int PIXEL_FORMAT_NV12 = 4;             //YUV420P
+    public static final int PIXEL_FORMAT_NV21 = 5;             //YUV420SP
 
 //--------------------------------------------------------------------------------------------------
 
@@ -103,6 +89,25 @@ public class UVCCamera {
     public static final int STATUS_ATTRIBUTE_INFO_CHANGE = 0x01;
     public static final int STATUS_ATTRIBUTE_FAILURE_CHANGE = 0x02;
     public static final int STATUS_ATTRIBUTE_UNKNOWN = 0xff;
+
+//--------------------------------------------------------------------------------------------------
+
+    //call method result status
+    public static final int ACTION_SUCCESS = 0;
+    public static final int ACTION_ERROR = -1;
+    //Preview rotate
+    public @interface PREVIEW_ROTATE {
+        int ROTATE_0 = 0;
+        int ROTATE_90 = 90;
+        int ROTATE_180 = 180;
+        int ROTATE_270 = 270;
+    }
+    //Preview flip
+    public @interface PREVIEW_FLIP {
+        int FLIP_H = 1;
+        int FLIP_DEFAULT = 0;
+        int FLIP_V = -1;
+    }
 
 //--------------------------------------------------------------------------------------------------
 
@@ -160,15 +165,7 @@ public class UVCCamera {
 //--------------------------------------------------------------------------------------------------
 
     static {
-        try {
-            System.loadLibrary("camera");
-            System.loadLibrary("jpeg_turbo_1500");
-            System.loadLibrary("usb_100");
-            System.loadLibrary("uvc");
-            System.loadLibrary("yuv");
-        } catch (UnsatisfiedLinkError e) {
-            e.printStackTrace();
-        }
+        System.loadLibrary("camera");
     }
 
     /**
@@ -184,7 +181,7 @@ public class UVCCamera {
      * Connect to a UVC camera
      * USB permission is necessary before this method is called
      *
-     * @param ctrlBlock
+     * @param ctrlBlock {@link USBMonitor.UsbControlBlock}
      */
     public synchronized void open(final USBMonitor.UsbControlBlock ctrlBlock) throws UnsupportedOperationException {
         try {
@@ -211,7 +208,7 @@ public class UVCCamera {
     /**
      * set status callback
      *
-     * @param callback
+     * @param callback {@link IStatusCallback}
      */
     public void setStatusCallback(final IStatusCallback callback) {
         if (mNativePtr != 0) {
@@ -222,7 +219,7 @@ public class UVCCamera {
     /**
      * set button callback
      *
-     * @param callback
+     * @param callback {@link IButtonCallback}
      */
     public void setButtonCallback(final IButtonCallback callback) {
         if (mNativePtr != 0) {
@@ -285,32 +282,28 @@ public class UVCCamera {
      * Add by hsj
      * The method priority is higher than {@link UVCCamera#setPreviewFlip}
      *
-     * @param orientation {@link UVCCamera#ROTATE_90}、{@link UVCCamera#ROTATE_180}、
-     *                    {@link UVCCamera#ROTATE_270}、 other value are default {@link UVCCamera#ROTATE_0}
+     * @param rotate {@link PREVIEW_ROTATE}
      * @return true is success
      */
-    public boolean setPreviewOrientation(int orientation) {
-        if (orientation == ROTATE_90 || orientation == ROTATE_270
-                || orientation == ROTATE_0 || orientation == ROTATE_180) {
-            return nativeSetPreviewOrientation(mNativePtr, orientation) == ACTION_SUCCESS;
-        } else {
-            return false;
+    public boolean setPreviewRotate(@PREVIEW_ROTATE int rotate) {
+        if (mNativePtr != 0) {
+            return nativeSetPreviewOrientation(mNativePtr, rotate) == ACTION_SUCCESS;
         }
+        return false;
     }
 
     /**
      * Add by hsj
-     * The method priority is lower than {@link UVCCamera#setPreviewOrientation}
+     * The method priority is lower than {@link UVCCamera#setPreviewRotate}
      *
      * @param flip -1 is horizontal flip, 1 is vertical flip,other value are not flip
      * @return true is success
      */
-    public boolean setPreviewFlip(int flip) {
-        if (flip == FLIP_H || flip == FLIP_W || flip == FLIP_DEFAULT) {
+    public boolean setPreviewFlip(@PREVIEW_FLIP int flip) {
+        if(mNativePtr!=0){
             return nativeSetPreviewFlip(mNativePtr, flip) == ACTION_SUCCESS;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -383,7 +376,7 @@ public class UVCCamera {
     /**
      * getSupportedSizeList
      *
-     * @return
+     * @return List<Size>
      */
     public List<Size> getSupportedSizeList() {
         return getSupportedSize((mCurrentFrameFormat > 0) ? 6 : 4, mSupportedSize);
@@ -394,7 +387,7 @@ public class UVCCamera {
      *
      * @param type
      * @param supportedSize
-     * @return
+     * @return List<Size>
      */
     public static List<Size> getSupportedSize(final int type, final String supportedSize) {
         List<Size> result = new ArrayList<>();
@@ -425,7 +418,7 @@ public class UVCCamera {
      * @param formatType
      * @param frameType
      * @param size_list
-     * @throws JSONException
+     * @throws {@link JSONException}
      */
     private static void addSize(final JSONObject format, final int formatType,
                                 final int frameType, final List<Size> size_list) throws JSONException {
@@ -445,7 +438,7 @@ public class UVCCamera {
      * set preview surface with SurfaceHolder</br>
      * you can use SurfaceHolder came from SurfaceView/GLSurfaceView
      *
-     * @param holder
+     * @param holder {@link SurfaceHolder}
      */
     public synchronized void setPreviewDisplay(final SurfaceHolder holder) {
         nativeSetPreviewDisplay(mNativePtr, holder.getSurface());
@@ -455,7 +448,7 @@ public class UVCCamera {
      * set preview surface with SurfaceTexture.
      * this method require API >= 14
      *
-     * @param texture
+     * @param texture {@link SurfaceTexture}
      */
     public synchronized void setPreviewTexture(final SurfaceTexture texture) {
         nativeSetPreviewDisplay(mNativePtr, new Surface(texture));
@@ -464,7 +457,7 @@ public class UVCCamera {
     /**
      * set preview surface with Surface
      *
-     * @param surface
+     * @param surface {@link SurfaceHolder}
      */
     public synchronized void setPreviewDisplay(final Surface surface) {
         nativeSetPreviewDisplay(mNativePtr, surface);
@@ -473,7 +466,7 @@ public class UVCCamera {
     /**
      * set frame callback
      *
-     * @param callback
+     * @param callback {@link IFrameCallback}
      * @param pixelFormat
      */
     public void setFrameCallback(final IFrameCallback callback, final int pixelFormat) {

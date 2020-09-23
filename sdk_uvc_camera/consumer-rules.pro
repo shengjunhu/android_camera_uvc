@@ -1,8 +1,6 @@
-#Natvie方法不混淆
+-keep class com.hsj.camera.* {*;}
+-dontwarn com.hsj.camera.**
+
 -keepclasseswithmembernames class * {
     native <methods>;
 }
-
-#UVC包不混淆
--keep class com.serenegiant.** {*;}
-

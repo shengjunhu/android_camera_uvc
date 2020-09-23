@@ -1,6 +1,8 @@
 package com.hsj.sample.uvc;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.usb.UsbDevice;
@@ -10,18 +12,28 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.TextureView;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.hsj.camera.DeviceFilter;
+import com.hsj.camera.IFrameCallback;
 import com.hsj.camera.Size;
 import com.hsj.camera.USBMonitor;
 import com.hsj.camera.UVCCamera;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -30,53 +42,124 @@ import java.util.List;
  * @Class:MainActivity
  * @Desc:Sample of UVCCamera
  */
-public final class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener,
-        Handler.Callback, USBMonitor.OnDeviceConnectListener {
+public final class MainActivity extends AppCompatActivity implements Handler.Callback, SurfaceHolder.Callback {
 
     private static final String TAG = "MainActivity";
     //TODO Set your usb camera productId
-    private static final int CAMERA_ID_RGB = 12384;
+    private static final int PRODUCT_ID = 12384;
     //TODO Set your usb camera display width and height
-    private static final int RGB_PREVIEW_WIDTH = 640;
-    private static final int RGB_PREVIEW_HEIGHT = 480;
+    private static int PREVIEW_WIDTH = 640;
+    private static int PREVIEW_HEIGHT = 480;
 
     private static final int CAMERA_CREATE = 1;
-    private static final int CAMERA_START = 2;
-    private static final int CAMERA_STOP = 3;
-    private static final int CAMERA_DESTROY = 4;
+    private static final int CAMERA_PREVIEW = 2;
+    private static final int CAMERA_START = 3;
+    private static final int CAMERA_STOP = 4;
+    private static final int CAMERA_DESTROY = 5;
 
-    private Surface surface;
-    private SurfaceTexture surfaceTexture;
-
+    private int index = 0;
+    private Context context;
+    private USBMonitor mUSBMonitor;
     private Handler cameraHandler;
     private HandlerThread cameraThread;
-
-    private boolean isStartRGB;
-    private UVCCamera rgbCamera;
-    private USBMonitor mUSBMonitor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextureView tv = findViewById(R.id.tv);
-        tv.setSurfaceTextureListener(this);
-
-        if (hasPermissions(Manifest.permission.CAMERA)) {
-            this.mUSBMonitor = new USBMonitor(this, this);
-            this.mUSBMonitor.register();
-        }
+        SurfaceView sv = findViewById(R.id.sv);
+        sv.getHolder().addCallback(this);
+        context = getApplicationContext();
 
         this.cameraThread = new HandlerThread("camera_uvc_thread");
         this.cameraThread.start();
         this.cameraHandler = new Handler(cameraThread.getLooper(), this);
 
-        findViewById(R.id.btn_start).setOnClickListener(v ->
-                cameraHandler.obtainMessage(CAMERA_START, surfaceTexture).sendToTarget());
-        findViewById(R.id.btn_stop).setOnClickListener(v ->
-                cameraHandler.obtainMessage(CAMERA_STOP).sendToTarget());
+        if (hasPermissions(Manifest.permission.CAMERA)) {
+            createUsbMonitor();
+        }
     }
+
+    private boolean hasPermissions(String... permissions) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
+        if (permissions == null || permissions.length == 0) return true;
+        boolean allGranted = true;
+        for (String permission : permissions) {
+            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                allGranted = false;
+                ActivityCompat.requestPermissions(this, permissions, 0);
+            }
+        }
+        return allGranted;
+    }
+
+    private void createUsbMonitor() {
+        this.mUSBMonitor = new USBMonitor(context, onDeviceConnectListener);
+        this.mUSBMonitor.register();
+        showSingleChoiceDialog(false);
+    }
+
+//==========================================Menu====================================================
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.item_camera) {
+            showSingleChoiceDialog(true);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showSingleChoiceDialog(boolean show) {
+        if (mUSBMonitor == null) return;
+        List<UsbDevice> deviceList = mUSBMonitor.getDeviceList();
+        if (deviceList.size() == 0) return;
+        //Open first UsbDevice by default
+        if (!show) {
+            mUSBMonitor.requestPermission(deviceList.get(index));
+            return;
+        }
+        String[] items = new String[deviceList.size()];
+        for (int i = 0; i < deviceList.size(); ++i) {
+            UsbDevice device = deviceList.get(i);
+            items[i] = device.getProductName() + " -> " + device.getDeviceName();
+        }
+        AlertDialog.Builder selectDialog = new AlertDialog.Builder(this);
+        selectDialog.setTitle(R.string.select_camera);
+        final int lastSelected = index;
+        selectDialog.setSingleChoiceItems(items, index, (dialog, which) -> {
+            index = which;
+        });
+        selectDialog.setPositiveButton(R.string.btn_confirm, (dialog, which) -> {
+            if (mUSBMonitor != null && lastSelected != index) {
+                cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
+                mUSBMonitor.requestPermission(deviceList.get(index));
+            }
+        });
+        selectDialog.show();
+    }
+
+//==========================================Button Click============================================
+
+    public void startPreview(View view) {
+        cameraHandler.obtainMessage(CAMERA_START).sendToTarget();
+    }
+
+    public void stopPreview(View view) {
+        cameraHandler.obtainMessage(CAMERA_STOP).sendToTarget();
+    }
+
+    public void destroyCamera(View view) {
+        cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
+    }
+
+//=========================================Activity=================================================
 
     @Override
     protected void onStart() {
@@ -89,9 +172,6 @@ public final class MainActivity extends AppCompatActivity implements TextureView
     @Override
     protected void onStop() {
         super.onStop();
-        if (cameraHandler != null) {
-            cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
-        }
         if (mUSBMonitor != null && mUSBMonitor.isRegistered()) {
             mUSBMonitor.unregister();
         }
@@ -102,23 +182,12 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         super.onDestroy();
         if (mUSBMonitor != null) {
             mUSBMonitor.destroy();
+            mUSBMonitor = null;
         }
         if (cameraThread != null) {
             cameraThread.quitSafely();
+            cameraThread = null;
         }
-    }
-
-    private boolean hasPermissions(String... permissions) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
-        if (permissions == null || permissions.length == 0) return true;
-        boolean allGranted = true;
-        for (String permission : permissions) {
-            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                allGranted = false;
-                ActivityCompat.requestPermissions(this, permissions, 0x01);
-            }
-        }
-        return allGranted;
     }
 
     @Override
@@ -129,92 +198,81 @@ public final class MainActivity extends AppCompatActivity implements TextureView
             hasAllPermissions &= (granted == PackageManager.PERMISSION_GRANTED);
         }
         if (hasAllPermissions) {
-            this.mUSBMonitor = new USBMonitor(this, this);
-            this.mUSBMonitor.register();
+            createUsbMonitor();
         }
     }
 
-//===================================SurfaceTexture=================================================
+//===================================Surface========================================================
 
     @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture st, int width, int height) {
-        Log.i(TAG, "onSurfaceTextureAvailable");
-        this.surfaceTexture = st;
+    public void surfaceCreated(SurfaceHolder holder) {
+        cameraHandler.obtainMessage(CAMERA_PREVIEW, holder.getSurface()).sendToTarget();
     }
 
     @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture st, int width, int height) {
-        Log.i(TAG, "onSurfaceTextureSizeChanged");
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
     }
 
     @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture st) {
-        //Log.i(TAG, "onSurfaceTextureUpdated");
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        Log.e(TAG, "->surfaceDestroyed");
+        cameraHandler.obtainMessage(CAMERA_DESTROY, holder.getSurface()).sendToTarget();
     }
 
-    @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture st) {
-        Log.i(TAG, "onSurfaceTextureDestroyed");
-        return false;
-    }
+//====================================UsbDevice Status==============================================
 
-//====================================Usb Status====================================================
-
-    @Override
-    public void onAttach(UsbDevice device) {
-        int productId = device.getProductId();
-        Log.i(TAG, "Usb productId = " + productId);
-        if (productId == CAMERA_ID_RGB) {
-            Toast.makeText(this, "Usb device attach->" + productId, Toast.LENGTH_LONG).show();
-            if (mUSBMonitor != null) {
-                mUSBMonitor.requestPermission(device);
-            }
+    private final USBMonitor.OnDeviceConnectListener onDeviceConnectListener = new USBMonitor.OnDeviceConnectListener() {
+        @Override
+        public void onAttach(UsbDevice device) {
+            Log.i(TAG, "Usb->onAttach->" + device.getProductId());
         }
-    }
 
-    @Override
-    public void onConnect(UsbDevice device, USBMonitor.UsbControlBlock block, boolean createNew) {
-        Log.i(TAG, "Usb device connect");
-        int productId = device.getProductId();
-        if (productId == CAMERA_ID_RGB) {
-            cameraHandler.obtainMessage(CAMERA_CREATE, block).sendToTarget();
+        @Override
+        public void onConnect(UsbDevice device, USBMonitor.UsbControlBlock ctrlBlock, boolean createNew) {
+            Log.i(TAG, "Usb->onConnect->" + device.getProductId());
+            cameraHandler.obtainMessage(CAMERA_CREATE, ctrlBlock).sendToTarget();
         }
-    }
 
-    @Override
-    public void onDisconnect(UsbDevice device, USBMonitor.UsbControlBlock ctrlBlock) {
-        Log.i(TAG, "Usb device disconnect");
-        if (cameraHandler != null) {
-            cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
+        @Override
+        public void onDisconnect(UsbDevice device, USBMonitor.UsbControlBlock ctrlBlock) {
+            Log.i(TAG, "Usb->onDisconnect->" + device.getProductId());
         }
-    }
 
-    @Override
-    public void onCancel(UsbDevice device) {
-        Log.i(TAG, "Usb device cancel");
-    }
+        @Override
+        public void onCancel(UsbDevice device) {
+            Log.i(TAG, "Usb->onCancel->" + device.getProductId());
+        }
 
-    @Override
-    public void onDetach(UsbDevice device) {
-        Log.i(TAG, "Usb device detach");
-    }
+        @Override
+        public void onDetach(UsbDevice device) {
+            Log.i(TAG, "Usb->onDetach->" + device.getProductId());
+        }
+    };
 
 //=====================================UVCCamera Action=============================================
+
+    private boolean isStart;
+    private Surface surface;
+    private UVCCamera camera;
 
     @Override
     public boolean handleMessage(@NonNull Message msg) {
         switch (msg.what) {
             case CAMERA_CREATE:
-                initCameraRGB((USBMonitor.UsbControlBlock) msg.obj);
+                initCamera((USBMonitor.UsbControlBlock) msg.obj);
+                break;
+            case CAMERA_PREVIEW:
+                setSurface((Surface) msg.obj);
                 break;
             case CAMERA_START:
-                startCameraRGB((SurfaceTexture) msg.obj);
+                startCamera();
                 break;
             case CAMERA_STOP:
-                stopCameraRGB();
+                stopCamera();
                 break;
             case CAMERA_DESTROY:
-                destroyCameraRGB();
+                destroyCamera();
                 break;
             default:
                 break;
@@ -222,59 +280,92 @@ public final class MainActivity extends AppCompatActivity implements TextureView
         return true;
     }
 
-    private void initCameraRGB(@NonNull USBMonitor.UsbControlBlock blockRGB) {
+    private void initCamera(@NonNull USBMonitor.UsbControlBlock block) {
         long t = System.currentTimeMillis();
-        if (rgbCamera != null) {
-            stopCameraRGB();
-            destroyCameraRGB();
+        if (camera != null) {
+            destroyCamera();
         }
         try {
-            rgbCamera = new UVCCamera();
-            rgbCamera.open(blockRGB);
-            rgbCamera.setPreviewOrientation(90);
-            rgbCamera.setPreviewFlip(1);
-            rgbCamera.setPreviewSize(RGB_PREVIEW_WIDTH, RGB_PREVIEW_HEIGHT,
+            camera = new UVCCamera();
+            camera.open(block);
+            camera.setPreviewRotate(UVCCamera.PREVIEW_ROTATE.ROTATE_90);
+            camera.setPreviewFlip(UVCCamera.PREVIEW_FLIP.FLIP_H);
+            checkSupportSize(camera);
+            camera.setPreviewSize(PREVIEW_WIDTH, PREVIEW_HEIGHT,
                     UVCCamera.FRAME_FORMAT_MJPEG, 1.0f);
         } catch (UnsupportedOperationException | IllegalArgumentException e) {
             e.printStackTrace();
         }
-        Log.i(TAG, "rgb camera create time=" + (System.currentTimeMillis() - t));
-    }
-
-    private void startCameraRGB(SurfaceTexture surfaceTexture) {
-        long t = System.currentTimeMillis();
-        if (rgbCamera != null && !isStartRGB) {
-            isStartRGB = true;
-            if (surfaceTexture != null) {
-                surface = new Surface(surfaceTexture);
-                rgbCamera.setPreviewDisplay(surface);
-            }
-            //rgbCamera.setFrameCallback(bb -> {}, UVCCamera.PIXEL_FORMAT_RAW);
-            rgbCamera.startPreview();
+        Log.i(TAG, "camera create time=" + (System.currentTimeMillis() - t));
+        if (surface != null) {
+            startCamera();
         }
-        Log.i(TAG, "rgb camera start time=" + (System.currentTimeMillis() - t));
     }
 
-    private void stopCameraRGB() {
+    private void checkSupportSize(UVCCamera mCamera) {
+        List<Size> sizes = mCamera.getSupportedSizeList();
+        //Most UsbCamera support 640x480
+        //A few UsbCamera may fail to obtain the supported resolution
+        if (sizes == null || sizes.size() == 0) return;
+        Log.i(TAG, mCamera.getSupportedSize());
+        boolean isSupport = false;
+        for (Size size : sizes) {
+            if (size.width == PREVIEW_WIDTH && size.height == PREVIEW_HEIGHT) {
+                isSupport = true;
+                break;
+            }
+        }
+        if (!isSupport) {
+            //Use intermediate support size
+            Size size = sizes.get(sizes.size() / 2);
+            PREVIEW_WIDTH = size.width;
+            PREVIEW_HEIGHT = size.height;
+        }
+        Log.i(TAG, String.format("SupportSize->with=%d,height=%d", PREVIEW_WIDTH, PREVIEW_HEIGHT));
+    }
+
+    private void setSurface(Surface surface) {
+        this.surface = surface;
+        if (isStart) {
+            stopCamera();
+            startCamera();
+        } else if (camera != null) {
+            startCamera();
+        }
+    }
+
+    private void startCamera() {
         long t = System.currentTimeMillis();
-        if (rgbCamera != null && isStartRGB) {
-            isStartRGB = false;
-            rgbCamera.stopPreview();
+        if (!isStart && camera != null) {
+            isStart = true;
             if (surface != null) {
-                surface.release();
+                Log.i(TAG, "setPreviewDisplay()");
+                camera.setPreviewDisplay(surface);
             }
+            //camera.setFrameCallback(frame -> {}, UVCCamera.PIXEL_FORMAT_NV21);
+            camera.startPreview();
         }
-        Log.i(TAG, "rgb camera stop time=" + (System.currentTimeMillis() - t));
+        Log.i(TAG, "camera start time=" + (System.currentTimeMillis() - t));
     }
 
-    private void destroyCameraRGB() {
+    private void stopCamera() {
         long t = System.currentTimeMillis();
-        if (rgbCamera != null) {
-            rgbCamera.close();
-            rgbCamera.destroy();
-            rgbCamera = null;
+        if (isStart && camera != null) {
+            isStart = false;
+            camera.stopPreview();
         }
-        Log.i(TAG, "rgb camera destroy time=" + (System.currentTimeMillis() - t));
+        Log.i(TAG, "camera stop time=" + (System.currentTimeMillis() - t));
+    }
+
+    private void destroyCamera() {
+        long t = System.currentTimeMillis();
+        stopCamera();
+        if (camera != null) {
+            camera.close();
+            camera.destroy();
+            camera = null;
+        }
+        Log.i(TAG, "camera destroy time=" + (System.currentTimeMillis() - t));
     }
 
 }

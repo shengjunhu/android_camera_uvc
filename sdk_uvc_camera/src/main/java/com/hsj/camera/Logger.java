@@ -6,9 +6,9 @@ import java.lang.reflect.Method;
 
 /**
  * @Author:hsj
- * @Date:2019-07-23 15:16
+ * @Date:2019-07-23
  * @Class:Logger
- * @Description:日志工具类
+ * @Desc:Log
  */
 final class Logger {
 

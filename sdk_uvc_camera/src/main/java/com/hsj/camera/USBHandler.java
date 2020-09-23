@@ -17,7 +17,7 @@ public class USBHandler extends Handler {
     }
 
     public static USBHandler createHandler() {
-        return createHandler("USBHandler");
+        return createHandler(TAG);
     }
 
     public static USBHandler createHandler(String name) {
@@ -27,7 +27,7 @@ public class USBHandler extends Handler {
     }
 
     public static USBHandler createHandler(Callback callback) {
-        return createHandler("USBHandler", callback);
+        return createHandler(TAG, callback);
     }
 
     public static USBHandler createHandler(String name, Callback callback) {

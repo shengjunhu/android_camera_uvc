@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.4.1)
 project(libuvc)
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -16,11 +16,9 @@ set(libuvc_VERSION_MINOR 0)
 set(libuvc_VERSION_PATCH 4)
 set(libuvc_VERSION ${libuvc_VERSION_MAJOR}.${libuvc_VERSION_MINOR}.${libuvc_VERSION_PATCH})
 
-find_library(LIBUSB_LIBRARY_NAMES usb-1.0
-	PATHS /opt/local/lib)
+find_library(LIBUSB_LIBRARY_NAMES usb-1.0 PATHS /opt/local/lib)
 
-find_path(LIBUSB_INCLUDE_DIR libusb-1.0/libusb.h
-	PATHS /opt/local/include)
+find_path(LIBUSB_INCLUDE_DIR libusb-1.0/libusb.h PATHS /opt/local/include)
 
 # Try to find JPEG using a module or pkg-config. If that doesn't work, search for the header.
 find_package(jpeg QUIET)

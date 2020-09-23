@@ -25,17 +25,20 @@
 ######################################################################
 # Make shared library libUVCCamera.so
 ######################################################################
+
 LOCAL_PATH	:= $(call my-dir)
+
 include $(CLEAR_VARS)
 
 ######################################################################
 # Make shared library libUVCCamera.so
 ######################################################################
+
 CFLAGS := -Werror
 
 LOCAL_C_INCLUDES := \
-		$(LOCAL_PATH)/ \
 		$(LOCAL_PATH)/../ \
+		$(LOCAL_PATH)/source \
 		$(LOCAL_PATH)/../librapidjson/include \
 
 LOCAL_CFLAGS := $(LOCAL_C_INCLUDES:%=-I%)
@@ -53,14 +56,14 @@ LOCAL_SHARED_LIBRARIES += usb_100 uvc
 LOCAL_ARM_MODE := arm
 
 LOCAL_SRC_FILES := \
-		_onload.cpp \
-		utilbase.cpp \
-		UVCCamera.cpp \
-		UVCPreview.cpp \
-		UVCButtonCallback.cpp \
-		UVCStatusCallback.cpp \
-		Parameters.cpp \
-		com_hsj_camera_UVCCamera.cpp
+		source/_onload.cpp \
+		source/base_util.cpp \
+		source/Parameters.cpp \
+		source/UVCCamera.cpp \
+		source/UVCPreview.cpp \
+		source/UVCButtonCallback.cpp \
+		source/UVCStatusCallback.cpp \
+		source/com_hsj_camera_UVCCamera.cpp
 
-LOCAL_MODULE    := camera
+LOCAL_MODULE := camera
 include $(BUILD_SHARED_LIBRARY)
