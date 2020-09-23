@@ -3,10 +3,7 @@ android sample of uvccamera,
 developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCamera)
 
 ### Image
-![screenshot_1](doc/file/screenshot_1.png)
-![screenshot_2](doc/file/screenshot_2.png)
-![APK](doc/file/UsbCamera_v20092316.apk)
-
+![screenshot_1](doc/file/screenshot_1.png) ![screenshot_2](doc/file/screenshot_2.png)
 
 ### Add Function
 
@@ -77,6 +74,8 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
     ...
 }
 ```
+
+[APK](doc/file/UsbCamera_v20092316.apk)
 
 ### About Author:
 * Author: shengjunhu
