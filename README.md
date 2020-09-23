@@ -4,6 +4,12 @@ developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCam
 
 ### Image
 <center>
+    ![](doc/file/screenshot_1.png)
+    ![](doc/file/screenshot_2.png)
+    ![](doc/file/screenshot_3.png)
+</center>
+
+<center>
     <figure class="third">
         <img src="doc/file/screenshot_1.png">
         <img src="doc/file/screenshot_2.png">
