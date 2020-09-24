@@ -12,7 +12,7 @@ developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCam
 
 * 1-Add `UVCCamera` API with `setPreviewRotate(int rotate)`;
 ```java
-public boolean setPreviewRotate(@PREVIEW_ROTATEint rotate)
+public boolean setPreviewRotate(@PREVIEW_ROTATE int rotate)
 ```
 
 * 2-Add `UVCCamera` API with `setPreviewFlip(int flipH)`;
