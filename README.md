@@ -3,10 +3,10 @@ android sample of uvccamera,
 developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCamera)
 
 ### Image
-<img src="doc/file/screenshot_1.png" width="200"/> <img src="doc/file/screenshot_2.png" width="200"/> <img src="doc/file/screenshot_3.png" width="200"/>
+<img src="doc/img/screenshot_1.png" width="200"/> <img src="doc/img/screenshot_2.png" width="200"/> <img src="doc/img/screenshot_3.png" width="200"/>
 
 ### Sample
-[![APK](doc/file/android_logo.png)](doc/file/UsbCamera_v20092316.apk)
+[![APK](doc/img/android_logo.png)](doc/file/UsbCamera_v20092316.apk)
 
 ### Add Function
 
