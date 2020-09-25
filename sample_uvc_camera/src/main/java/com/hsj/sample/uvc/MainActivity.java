@@ -295,6 +295,8 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
                     UVCCamera.FRAME_FORMAT_MJPEG, 1.0f);
         } catch (UnsupportedOperationException | IllegalArgumentException e) {
             e.printStackTrace();
+            camera.destroy();
+            camera = null;
         }
         Log.i(TAG, "camera create time=" + (System.currentTimeMillis() - t));
         if (surface != null) {

@@ -1363,8 +1363,8 @@ void API_EXPORTED libusb_free_transfer(struct libusb_transfer *transfer) {
 	usbi_mutex_destroy(&itransfer->lock);
 	free(itransfer);
 
-	//Remove by shengjunhu for fix caused random heap corruption
-	//transfer->user_data = NULL;	// XXX
+	//Remove by Hsj for fix caused random heap corruption
+	//transfer->user_data = NULL;
 }
 
 #ifdef USBI_TIMERFD_AVAILABLE

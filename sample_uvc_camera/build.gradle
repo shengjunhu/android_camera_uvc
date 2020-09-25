@@ -78,6 +78,6 @@ dependencies {
     //debugImplementation rootProject.ext.dependencies.leak_canary
 
     //UVCCamera
-    implementation project(path: ':sdk_uvc_camera')
-    //implementation(name: 'sdk_uvc_camera_v20082017_release', ext: 'aar')
+    //implementation project(path: ':sdk_uvc_camera')
+    implementation(name: 'sdk_uvc_camera_v20092318_release', ext: 'aar')
 }

@@ -78,6 +78,10 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
 }
 ```
 
+### About Build
+* NDK: ndk-r14b
+* CMake
+
 ### About Author:
 * Author: shengjunhu
 * Date  : 2020/5/1
