@@ -287,7 +287,7 @@ public class UVCCamera {
      */
     public boolean setPreviewRotate(@PREVIEW_ROTATE int rotate) {
         if (mNativePtr != 0) {
-            return nativeSetPreviewOrientation(mNativePtr, rotate) == ACTION_SUCCESS;
+            return nativeSetPreviewRotate(mNativePtr, rotate) == ACTION_SUCCESS;
         }
         return false;
     }
@@ -1292,7 +1292,7 @@ public class UVCCamera {
 
     private static native int nativeStopPreview(final long id_camera);
 
-    private static native int nativeSetPreviewOrientation(final long id_camera, final int orientation);
+    private static native int nativeSetPreviewRotate(final long id_camera, final int orientation);
 
     private static native int nativeSetPreviewFlip(final long id_camera, final int flipH);
 

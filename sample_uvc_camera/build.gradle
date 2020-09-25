@@ -14,6 +14,7 @@ android {
         testInstrumentationRunner rootProject.ext.dependencies.testInstrumentationRunner
     }
 
+    //UsbCamera
     buildTypes {
         debug {
             minifyEnabled false
@@ -79,5 +80,5 @@ dependencies {
 
     //UVCCamera
     //implementation project(path: ':sdk_uvc_camera')
-    implementation(name: 'sdk_uvc_camera_v20092318_release', ext: 'aar')
+    implementation(name: 'sdk_uvc_camera_v20092519_release', ext: 'aar')
 }

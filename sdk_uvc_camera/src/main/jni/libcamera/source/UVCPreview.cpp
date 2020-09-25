@@ -257,6 +257,7 @@ int UVCPreview::setPreviewDisplay(ANativeWindow *preview_window) {
 
 int UVCPreview::setFrameCallback(JNIEnv *env, jobject frame_callback_obj, int pixel_format) {
     ENTER();
+    LOGE("frame_callback_obj->%d",frame_callback_obj!=NULL);
     pthread_mutex_lock(&capture_mutex);
     {
         if (isRunning() && isCapturing()) {
@@ -267,17 +268,17 @@ int UVCPreview::setFrameCallback(JNIEnv *env, jobject frame_callback_obj, int pi
                 pthread_cond_wait(&capture_sync, &capture_mutex);
             }
         }
-        if (!env->IsSameObject(mFrameCallbackObj, frame_callback_obj)) {
+
+        if (!env->IsSameObject(mFrameCallbackObj,frame_callback_obj)) {
             iframecallback_fields.onFrame = NULL;
             if (mFrameCallbackObj) {
                 env->DeleteGlobalRef(mFrameCallbackObj);
             }
+            mFrameCallbackObj = frame_callback_obj;
             if (frame_callback_obj) {
-                mFrameCallbackObj = frame_callback_obj;
                 jclass clazz = env->GetObjectClass(frame_callback_obj);
                 if (LIKELY(clazz)) {
-                    iframecallback_fields.onFrame = env->GetMethodID(clazz,
-                                                                     "onFrame",
+                    iframecallback_fields.onFrame = env->GetMethodID(clazz,"onFrame",
                                                                      "(Ljava/nio/ByteBuffer;)V");
                 } else {
                     LOGE("Can't find IFrameCallback class");
