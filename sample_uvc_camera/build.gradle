@@ -14,10 +14,19 @@ android {
         testInstrumentationRunner rootProject.ext.dependencies.testInstrumentationRunner
     }
 
-    //UsbCamera
+    signingConfigs {
+        config {
+            keyAlias 'UsbCamera'
+            keyPassword 'UsbCamera'
+            storeFile file('android.jks')
+            storePassword 'UsbCamera'
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
+            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         release {
@@ -26,6 +35,7 @@ android {
             zipAlignEnabled true
             debuggable false
             jniDebuggable false
+            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

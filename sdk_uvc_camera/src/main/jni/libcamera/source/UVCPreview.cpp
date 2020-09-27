@@ -178,7 +178,8 @@ void UVCPreview::clear_pool() {
 
 inline const bool UVCPreview::isRunning() const { return mIsRunning; }
 
-int UVCPreview::setPreviewSize(int width, int height, int min_fps, int max_fps,
+int UVCPreview::setPreviewSize(int width, int height,
+                               int min_fps, int max_fps,
                                int mode, float bandwidth) {
     ENTER();
     int result = 0;
@@ -241,7 +242,7 @@ int UVCPreview::setPreviewDisplay(ANativeWindow *preview_window) {
             if (LIKELY(mPreviewWindow)) {
                 //ANativeWindow width、height by hsj
                 //ANativeWindow_setBuffersGeometry(mPreviewWindow,frameWidth,frameHeight, previewFormat);
-                if (previewRotate == 90 || previewRotate == 270) {
+                if (previewRotate == ROTATE_90 || previewRotate == ROTATE_270) {
                     ANativeWindow_setBuffersGeometry(mPreviewWindow, frameHeight, frameWidth,
                                                      previewFormat);
                 } else {
@@ -257,7 +258,7 @@ int UVCPreview::setPreviewDisplay(ANativeWindow *preview_window) {
 
 int UVCPreview::setFrameCallback(JNIEnv *env, jobject frame_callback_obj, int pixel_format) {
     ENTER();
-    LOGE("frame_callback_obj->%d",frame_callback_obj!=NULL);
+    LOGE("frame_callback_obj->%d", frame_callback_obj != NULL);
     pthread_mutex_lock(&capture_mutex);
     {
         if (isRunning() && isCapturing()) {
@@ -269,7 +270,7 @@ int UVCPreview::setFrameCallback(JNIEnv *env, jobject frame_callback_obj, int pi
             }
         }
 
-        if (!env->IsSameObject(mFrameCallbackObj,frame_callback_obj)) {
+        if (!env->IsSameObject(mFrameCallbackObj, frame_callback_obj)) {
             iframecallback_fields.onFrame = NULL;
             if (mFrameCallbackObj) {
                 env->DeleteGlobalRef(mFrameCallbackObj);
@@ -278,7 +279,7 @@ int UVCPreview::setFrameCallback(JNIEnv *env, jobject frame_callback_obj, int pi
             if (frame_callback_obj) {
                 jclass clazz = env->GetObjectClass(frame_callback_obj);
                 if (LIKELY(clazz)) {
-                    iframecallback_fields.onFrame = env->GetMethodID(clazz,"onFrame",
+                    iframecallback_fields.onFrame = env->GetMethodID(clazz, "onFrame",
                                                                      "(Ljava/nio/ByteBuffer;)V");
                 } else {
                     LOGE("Can't find IFrameCallback class");
@@ -553,7 +554,7 @@ int UVCPreview::prepare_preview(uvc_stream_ctrl_t *ctrl) {
                  (!requestMode ? "YUYV" : "MJPEG"));
             pthread_mutex_lock(&preview_mutex);
             if (LIKELY(mPreviewWindow)) {
-                //ANativeWindow width、height by hsj
+                //ANativeWindow width、height by Hsj
                 //ANativeWindow_setBuffersGeometry(mPreviewWindow,frameWidth,frameHeight, previewFormat);
                 if (previewRotate == ROTATE_90 || previewRotate == ROTATE_270) {
                     ANativeWindow_setBuffersGeometry(mPreviewWindow, frameHeight, frameWidth,
@@ -608,7 +609,8 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
                         if (mPreviewWindow) {
                             //Add by Hsj for rotate and flip
                             //frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, PREVIEW_PIXEL_BYTES);
-                            frame = draw_preview_one(frame, &mPreviewWindow,uvc_yuyv2abgr,PREVIEW_PIXEL_BYTES);
+                            frame = draw_preview_one(frame, &mPreviewWindow, uvc_yuyv2abgr,
+                                                     PREVIEW_PIXEL_BYTES);
                         }
                         addCaptureFrame(frame);
                     } else {
@@ -626,7 +628,8 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
                     if (mPreviewWindow) {
                         //Add by Hsj for rotate and flip
                         //frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, PREVIEW_PIXEL_BYTES);
-                        frame = draw_preview_one(frame, &mPreviewWindow,uvc_yuyv2abgr, PREVIEW_PIXEL_BYTES);
+                        frame = draw_preview_one(frame, &mPreviewWindow, uvc_yuyv2abgr,
+                                                 PREVIEW_PIXEL_BYTES);
                     }
                     addCaptureFrame(frame);
                 }
@@ -646,7 +649,8 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
     EXIT();
 }
 
-static void copyFrame(const uint8_t *src, uint8_t *dest, const int width, int height,
+static void copyFrame(const uint8_t *src, uint8_t *dest,
+                      const int width, int height,
                       const int stride_src, const int stride_dest) {
     const int h8 = height % 8;
     for (int i = 0; i < h8; i++) {
@@ -748,7 +752,8 @@ uvc_frame_t *UVCPreview::draw_preview_one(uvc_frame_t *frame, ANativeWindow **wi
             pthread_mutex_unlock(&preview_mutex);
         }
     }
-    return frame; //RETURN(frame, uvc_frame_t *);
+    //RETURN(frame, uvc_frame_t *);
+    return frame;
 }
 
 //==================================================================================================
