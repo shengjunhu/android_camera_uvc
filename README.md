@@ -1,12 +1,14 @@
 # android_sample_uvccamera
 android sample of uvccamera,
-developed based on the [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCamera)
+developed based on the [saki4510t/UVCCamera][1]
 
 ### Image
-<img src="doc/img/screenshot_1.png" width="200"/> <img src="doc/img/screenshot_2.png" width="200"/> <img src="doc/img/screenshot_3.png" width="200"/>
+<img src="doc/img/screenshot_1.png" width="200px"/> <img src="doc/img/screenshot_2.png" width="200px"/> <img src="doc/img/screenshot_3.png" width="200px"/>
 
 ### Sample
-[![APK](doc/img/android_logo.png)](doc/apk/UsbCamera_v20092519.apk)
+| <img src="doc/img/android_logo.png" width="260px" /> |
+| :--------:                      |
+| Scan QR code or [Download][2]   |
 
 ### Add Function
 
@@ -93,3 +95,6 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
 Copyright (c) 2020 shengjunhu
 Please compliance with the UVCCamera license
 ```
+
+[1]: https://github.com/saki4510t/UVCCamera
+[2]: https://github.com/shengjunhu/android_sample_uvccamera/raw/master/doc/apk/sample_usbcamera_v20092519_release.apk
