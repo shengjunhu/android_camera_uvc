@@ -6,5 +6,24 @@
 	<usb-device vendor-id="0x1b80" />
 	<usb-device class="0" subclass="9" />
 	<usb-device class="2" subclass="0" />
-	<usb-device class="14" subclass="9" />
+	<usb-device class="14" />
+
+	<usb-device product-id="12290" vendor-id="7025" />
+
+	<usb-device product-id="0x408" vendor-id="0x5e1" />
+
+	<usb-device product-id="0x2861" vendor-id="0xeb1a" />
+
+	<usb-device product-id="0x7" vendor-id="0x1c88" />
+
+	<usb-device product-id="0x3c" vendor-id="0x1c88" />
+
+	<usb-device product-id="0x3d" vendor-id="0x1c88" />
+
+	<usb-device product-id="0x3e" vendor-id="0x1c88" />
+
+	<usb-device product-id="0x3f" vendor-id="0x1c88" />
+
+	<usb-device product-id="0x1001" vendor-id="0x1c88" />
+
 </usb>

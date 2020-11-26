@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +34,9 @@ import com.hsj.camera.Size;
 import com.hsj.camera.USBMonitor;
 import com.hsj.camera.UVCCamera;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -48,8 +52,8 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     //TODO Set your usb camera productId
     private static final int PRODUCT_ID = 12384;
     //TODO Set your usb camera display width and height
-    private static int PREVIEW_WIDTH = 640;
-    private static int PREVIEW_HEIGHT = 480;
+    private static int PREVIEW_WIDTH = 1280;
+    private static int PREVIEW_HEIGHT = 720;
 
     private static final int CAMERA_CREATE = 1;
     private static final int CAMERA_PREVIEW = 2;
@@ -95,7 +99,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     }
 
     private void createUsbMonitor() {
-        this.mUSBMonitor = new USBMonitor(context, onDeviceConnectListener);
+        this.mUSBMonitor = new USBMonitor(context, dcl);
         this.mUSBMonitor.register();
         showSingleChoiceDialog(false);
     }
@@ -191,7 +195,9 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         boolean hasAllPermissions = true;
         for (int granted : grantResults) {
@@ -222,7 +228,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
 
 //====================================UsbDevice Status==============================================
 
-    private final USBMonitor.OnDeviceConnectListener onDeviceConnectListener = new USBMonitor.OnDeviceConnectListener() {
+    private final USBMonitor.OnDeviceConnectListener dcl = new USBMonitor.OnDeviceConnectListener() {
         @Override
         public void onAttach(UsbDevice device) {
             Log.i(TAG, "Usb->onAttach->" + device.getProductId());
@@ -363,7 +369,6 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
         long t = System.currentTimeMillis();
         stopCamera();
         if (camera != null) {
-            camera.close();
             camera.destroy();
             camera = null;
         }

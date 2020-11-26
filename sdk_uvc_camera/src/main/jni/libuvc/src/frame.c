@@ -1463,11 +1463,11 @@ uvc_error_t uvc_any2iyuv420SP(uvc_frame_t *in, uvc_frame_t *out) {
 /**
  * yuyv2rotate2mirror2abgr
  * @param in  YUYV frame
- * @param out ABGR frame
+ * @param out ARGB frame
  * @param rotate YUYV to rotate
  * @param mirror YUYV to flip
  */
-uvc_error_t uvc_yuyv2abgr(uvc_frame_t *in, uvc_frame_t *out, int rotate, int flip) {
+uvc_error_t uvc_yuyv2argb(uvc_frame_t *in, uvc_frame_t *out, int rotate, int flip) {
     //无效参数
     if (UNLIKELY(in->frame_format != UVC_FRAME_FORMAT_YUYV)) {
         return UVC_ERROR_INVALID_PARAM;
@@ -1481,7 +1481,7 @@ uvc_error_t uvc_yuyv2abgr(uvc_frame_t *in, uvc_frame_t *out, int rotate, int fli
         return uvc_any2rgbx(in, out);
     }
     //out->Frame初始数据
-    out->frame_format = UVC_FRAME_FORMAT_ABGR;
+    out->frame_format = UVC_FRAME_FORMAT_ARGB;
     out->capture_time = in->capture_time;
     out->sequence = in->sequence;
     out->source = in->source;
@@ -1504,7 +1504,7 @@ uvc_error_t uvc_yuyv2abgr(uvc_frame_t *in, uvc_frame_t *out, int rotate, int fli
 
     //旋转并转换I420
     size_t size = in->width * in->height;
-    uint8_t *y_1 = in->data;
+    uint8_t *y_1 = out->data;
     uint8_t *u_1 = y_1 + size;
     uint8_t *v_1 = u_1 + size / 4;
     //内存区
@@ -1524,9 +1524,10 @@ uvc_error_t uvc_yuyv2abgr(uvc_frame_t *in, uvc_frame_t *out, int rotate, int fli
         I420Mirror(y_1, out_w, u_1, out_w_uv, v_1, out_w_uv,
                    y_2, out_w, u_2, out_w_uv, v_2, out_w_uv, out_w, flip * out_h);
     }
-    //转ABGR
+    //I420 -> ARGB
     I420ToABGR(y_2, out_w, u_2, out_w_uv, v_2, out_w_uv,
                out->data, out_w * 4, out_w, out_h);
+
     //释放内存
     SAFE_FREE(y_2)
     SAFE_FREE(u_2)

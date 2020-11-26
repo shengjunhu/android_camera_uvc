@@ -17,6 +17,20 @@ import com.hsj.camera.BuildConfig;
 
 public class UVCCamera {
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Call Step（You must call the method of '*' mark method at complete the use camera process）//
+    // 1. *UVCCamera camera = new UVCCamera(block);                                               //
+    //    camera.setPreviewRotate(UVCCamera.PREVIEW_ROTATE.ROTATE_90);                            //
+    //    camera.setPreviewFlip(UVCCamera.PREVIEW_FLIP.FLIP_H);                                   //
+    // 2. *camera.setPreviewSize();                                                               //
+    //    camera.setPreviewDisplay(surface);                                                      //
+    //    camera.setFrameCallback();                                                              //
+    // 3. *camera.startPreview();                                                                 //
+    // 4. *camera.stopPreview();                                                                  //
+    // 5. *camera.destroy();                                                                      //
+    //    camera = null;                                                                          //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private static final String TAG = "UVCCamera";
     private static final String DEFAULT_USBFS = "/dev/bus/usb";
     //Preview width and height
@@ -95,6 +109,7 @@ public class UVCCamera {
     //call method result status
     public static final int ACTION_SUCCESS = 0;
     public static final int ACTION_ERROR = -1;
+
     //Preview rotate
     public @interface PREVIEW_ROTATE {
         int ROTATE_0 = 0;
@@ -102,6 +117,7 @@ public class UVCCamera {
         int ROTATE_180 = 180;
         int ROTATE_270 = 270;
     }
+
     //Preview flip
     public @interface PREVIEW_FLIP {
         int FLIP_H = 1;
@@ -228,10 +244,11 @@ public class UVCCamera {
     }
 
     /**
-     * close and release UVC camera
+     * Must call stopPreview() at before
+     * Close and release UVC camera
      */
-    public synchronized void close() {
-        stopPreview();
+    private synchronized void close() {
+        //stopPreview();
         if (mNativePtr != 0) {
             nativeRelease(mNativePtr);
             //Don't set 0
@@ -300,7 +317,7 @@ public class UVCCamera {
      * @return true is success
      */
     public boolean setPreviewFlip(@PREVIEW_FLIP int flip) {
-        if(mNativePtr!=0){
+        if (mNativePtr != 0) {
             return nativeSetPreviewFlip(mNativePtr, flip) == ACTION_SUCCESS;
         }
         return false;
@@ -441,7 +458,11 @@ public class UVCCamera {
      * @param holder {@link SurfaceHolder}
      */
     public synchronized void setPreviewDisplay(final SurfaceHolder holder) {
-        nativeSetPreviewDisplay(mNativePtr, holder.getSurface());
+        if (holder==null){
+            nativeSetPreviewDisplay(mNativePtr, null);
+        }else {
+            nativeSetPreviewDisplay(mNativePtr, holder.getSurface());
+        }
     }
 
     /**
@@ -451,7 +472,11 @@ public class UVCCamera {
      * @param texture {@link SurfaceTexture}
      */
     public synchronized void setPreviewTexture(final SurfaceTexture texture) {
-        nativeSetPreviewDisplay(mNativePtr, new Surface(texture));
+        if (texture == null) {
+            nativeSetPreviewDisplay(mNativePtr, null);
+        } else {
+            nativeSetPreviewDisplay(mNativePtr, new Surface(texture));
+        }
     }
 
     /**
@@ -466,7 +491,7 @@ public class UVCCamera {
     /**
      * set frame callback
      *
-     * @param callback {@link IFrameCallback}
+     * @param callback    {@link IFrameCallback}
      * @param pixelFormat
      */
     public void setFrameCallback(final IFrameCallback callback, final int pixelFormat) {
@@ -488,14 +513,15 @@ public class UVCCamera {
      * stop preview
      */
     public synchronized void stopPreview() {
-        setFrameCallback(null, 0);
         if (mCtrlBlock != null) {
             nativeStopPreview(mNativePtr);
         }
+        setFrameCallback(null, 0);
     }
 
     /**
-     * destroy UVCCamera object
+     * Must call stopPreview() at before
+     * Destroy UVCCamera object
      */
     public synchronized void destroy() {
         close();

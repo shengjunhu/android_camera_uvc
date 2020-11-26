@@ -157,7 +157,8 @@ public final class USBMonitor {
             }
             // start connection check
             mDeviceCounts = 0;
-            mAsyncHandler.postDelayed(mDeviceCheckRunnable, 1000);
+            // 1000ms -> 100ms
+            mAsyncHandler.postDelayed(mDeviceCheckRunnable, 100);
         }
     }
 
@@ -557,6 +558,14 @@ public final class USBMonitor {
         }
     };
 
+    private void processAttach(final UsbDevice device) {
+        if (destroyed) return;
+        Logger.v(TAG, ">>processAttach");
+        if (mOnDeviceConnectListener != null) {
+            mAsyncHandler.post(() -> mOnDeviceConnectListener.onAttach(device));
+        }
+    }
+
     /**
      * open specific USB device
      *
@@ -589,14 +598,6 @@ public final class USBMonitor {
         updatePermission(device, false);
         if (mOnDeviceConnectListener != null) {
             mAsyncHandler.post(() -> mOnDeviceConnectListener.onCancel(device));
-        }
-    }
-
-    private void processAttach(final UsbDevice device) {
-        if (destroyed) return;
-        Logger.v(TAG, ">>processAttach");
-        if (mOnDeviceConnectListener != null) {
-            mAsyncHandler.post(() -> mOnDeviceConnectListener.onAttach(device));
         }
     }
 

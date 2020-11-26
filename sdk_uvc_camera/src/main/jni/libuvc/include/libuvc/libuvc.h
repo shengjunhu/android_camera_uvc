@@ -109,7 +109,7 @@ enum uvc_frame_format {
     /** Number of formats understood */
     UVC_FRAME_FORMAT_COUNT,
     /**rotate flip add by hsj*/
-    UVC_FRAME_FORMAT_ABGR,
+    UVC_FRAME_FORMAT_ARGB,
 };
 
 /* UVC_COLOR_FORMAT_* have been replaced with UVC_FRAME_FORMAT_*. Please use
@@ -846,7 +846,7 @@ uvc_error_t uvc_any2rgbx(uvc_frame_t *in, uvc_frame_t *out);         // XXX
 //hsj
 //rotate=null to not do rotate
 //mirror=null to not mirror
-uvc_error_t uvc_yuyv2abgr(uvc_frame_t *in, uvc_frame_t *out, int rotate, int flip);
+uvc_error_t uvc_yuyv2argb(uvc_frame_t *in, uvc_frame_t *out, int rotate, int flip);
 
 uvc_error_t uvc_yuyv2yuv420P(uvc_frame_t *in, uvc_frame_t *out);    // XXX
 uvc_error_t uvc_yuyv2yuv420SP(uvc_frame_t *in, uvc_frame_t *out);    // XXX

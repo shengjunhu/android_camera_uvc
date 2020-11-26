@@ -70,7 +70,7 @@ enum uvc_frame_format {
   UVC_FRAME_FORMAT_MJPEG,
   UVC_FRAME_FORMAT_GRAY8,
   //Add by hsj
-  UVC_FRAME_FORMAT_ABGR,
+  UVC_FRAME_FORMAT_ARGB,
   /** Number of formats understood */
   UVC_FRAME_FORMAT_COUNT,
 };

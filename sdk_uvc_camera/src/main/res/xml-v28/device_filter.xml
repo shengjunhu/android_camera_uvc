@@ -1,0 +1,761 @@
+<?xml version="1.0" encoding="utf-8"?>
+<usb>
+
+    <usb-device class="14" />
+
+    <usb-device
+        product-id="12290"
+        vendor-id="7025" />
+
+    <usb-device
+        product-id="0x408"
+        vendor-id="0x5e1" />
+
+    <usb-device
+        product-id="0x2861"
+        vendor-id="0xeb1a" />
+
+    <usb-device
+        product-id="0x7"
+        vendor-id="0x1c88" />
+
+    <usb-device
+        product-id="0x3c"
+        vendor-id="0x1c88" />
+
+    <usb-device
+        product-id="0x3d"
+        vendor-id="0x1c88" />
+
+    <usb-device
+        product-id="0x3e"
+        vendor-id="0x1c88" />
+
+    <usb-device
+        product-id="0x3f"
+        vendor-id="0x1c88" />
+
+    <usb-device
+        product-id="0x1001"
+        vendor-id="0x1c88" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="0" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="1" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="2" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="3" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="4" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="5" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="6" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="7" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="8" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="9" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="0"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="1"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="2"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="3"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="4"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="5"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="6"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="7"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="8"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="9"
+        subclass="10" />
+
+    <usb-device
+        class="0"
+        exclude="true"
+        protocol="10"
+        subclass="10" />
+</usb>

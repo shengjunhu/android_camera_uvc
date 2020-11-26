@@ -72,7 +72,7 @@ enum FourCC {
   FOURCC_AR30 = FOURCC('A', 'R', '3', '0'),  // 10 bit per channel. 2101010.
   FOURCC_AB30 = FOURCC('A', 'B', '3', '0'),  // ABGR version of 10 bit
   FOURCC_24BG = FOURCC('2', '4', 'B', 'G'),
-  FOURCC_RAW = FOURCC('r', 'a', 'w', ' '),
+  FOURCC_RAW  = FOURCC('r', 'a', 'w', ' '),
   FOURCC_RGBA = FOURCC('R', 'G', 'B', 'A'),
   FOURCC_RGBP = FOURCC('R', 'G', 'B', 'P'),  // rgb565 LE.
   FOURCC_RGBO = FOURCC('R', 'G', 'B', 'O'),  // argb1555 LE.
@@ -86,14 +86,10 @@ enum FourCC {
   FOURCC_YV16 = FOURCC('Y', 'V', '1', '6'),
   FOURCC_YV24 = FOURCC('Y', 'V', '2', '4'),
   FOURCC_YU12 = FOURCC('Y', 'U', '1', '2'),  // Linux version of I420.
-  FOURCC_J420 =
-      FOURCC('J', '4', '2', '0'),  // jpeg (bt.601 full), unofficial fourcc
-  FOURCC_J422 =
-      FOURCC('J', '4', '2', '2'),  // jpeg (bt.601 full), unofficial fourcc
-  FOURCC_J444 =
-      FOURCC('J', '4', '4', '4'),  // jpeg (bt.601 full), unofficial fourcc
-  FOURCC_J400 =
-      FOURCC('J', '4', '0', '0'),  // jpeg (bt.601 full), unofficial fourcc
+  FOURCC_J420 = FOURCC('J', '4', '2', '0'),  // jpeg (bt.601 full), unofficial fourcc
+  FOURCC_J422 = FOURCC('J', '4', '2', '2'),  // jpeg (bt.601 full), unofficial fourcc
+  FOURCC_J444 = FOURCC('J', '4', '4', '4'),  // jpeg (bt.601 full), unofficial fourcc
+  FOURCC_J400 = FOURCC('J', '4', '0', '0'),  // jpeg (bt.601 full), unofficial fourcc
   FOURCC_H420 = FOURCC('H', '4', '2', '0'),  // bt.709, unofficial fourcc
   FOURCC_H422 = FOURCC('H', '4', '2', '2'),  // bt.709, unofficial fourcc
   FOURCC_H444 = FOURCC('H', '4', '4', '4'),  // bt.709, unofficial fourcc
@@ -118,8 +114,8 @@ enum FourCC {
   FOURCC_BA81 = FOURCC('B', 'A', '8', '1'),  // Alias for BGGR.
   FOURCC_RGB3 = FOURCC('R', 'G', 'B', '3'),  // Alias for RAW.
   FOURCC_BGR3 = FOURCC('B', 'G', 'R', '3'),  // Alias for 24BG.
-  FOURCC_CM32 = FOURCC(0, 0, 0, 32),  // Alias for BGRA kCMPixelFormat_32ARGB
-  FOURCC_CM24 = FOURCC(0, 0, 0, 24),  // Alias for RAW kCMPixelFormat_24RGB
+  FOURCC_CM32 = FOURCC(0, 0, 0, 32),         // Alias for BGRA kCMPixelFormat_32ARGB
+  FOURCC_CM24 = FOURCC(0, 0, 0, 24),         // Alias for RAW kCMPixelFormat_24RGB
   FOURCC_L555 = FOURCC('L', '5', '5', '5'),  // Alias for RGBO.
   FOURCC_L565 = FOURCC('L', '5', '6', '5'),  // Alias for RGBP.
   FOURCC_5551 = FOURCC('5', '5', '5', '1'),  // Alias for RGBO.
@@ -157,7 +153,7 @@ enum FourCCBpp {
   FOURCC_BPP_AR30 = 32,
   FOURCC_BPP_AB30 = 32,
   FOURCC_BPP_24BG = 24,
-  FOURCC_BPP_RAW = 24,
+  FOURCC_BPP_RAW  = 24,
   FOURCC_BPP_RGBP = 16,
   FOURCC_BPP_RGBO = 16,
   FOURCC_BPP_R444 = 16,

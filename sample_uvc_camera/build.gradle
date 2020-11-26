@@ -72,23 +72,19 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    //Test
     testImplementation rootProject.ext.dependencies.testJunit
     androidTestImplementation rootProject.ext.dependencies.testExt
     androidTestImplementation rootProject.ext.dependencies.testEspresso
 
     //JetPack
     implementation rootProject.ext.dependencies.core
-    implementation rootProject.ext.dependencies.multidex
     implementation rootProject.ext.dependencies.appcompat
     implementation rootProject.ext.dependencies.annotations
-    implementation rootProject.ext.dependencies.constraint_layout
-    implementation rootProject.ext.dependencies.material
 
     //内存泄漏监控
     //debugImplementation rootProject.ext.dependencies.leak_canary
 
     //UVCCamera
     //implementation project(path: ':sdk_uvc_camera')
-    implementation(name: 'sdk_uvc_camera_v20092519_release', ext: 'aar')
+    implementation(name: 'sdk_uvc_camera_v20112619_release', ext: 'aar')
 }
