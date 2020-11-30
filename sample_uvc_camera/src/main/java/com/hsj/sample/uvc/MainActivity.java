@@ -298,7 +298,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             camera.setPreviewFlip(UVCCamera.PREVIEW_FLIP.FLIP_H);
             checkSupportSize(camera);
             camera.setPreviewSize(PREVIEW_WIDTH, PREVIEW_HEIGHT,
-                    UVCCamera.FRAME_FORMAT_MJPEG, 1.0f);
+                    UVCCamera.FRAME_FORMAT_YUYV, 1.0f);
         } catch (UnsupportedOperationException | IllegalArgumentException e) {
             e.printStackTrace();
             camera.destroy();

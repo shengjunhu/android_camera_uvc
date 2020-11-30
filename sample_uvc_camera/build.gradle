@@ -86,5 +86,5 @@ dependencies {
 
     //UVCCamera
     //implementation project(path: ':sdk_uvc_camera')
-    implementation(name: 'sdk_uvc_camera_v20112619_release', ext: 'aar')
+    implementation(name: 'sdk_uvc_camera_v20113016_release', ext: 'aar')
 }

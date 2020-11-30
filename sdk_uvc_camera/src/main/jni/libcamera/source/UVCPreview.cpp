@@ -62,11 +62,11 @@ UVCPreview::UVCPreview(uvc_device_handle_t *devh)
           requestBandwidth(DEFAULT_BANDWIDTH),
           frameWidth(DEFAULT_PREVIEW_WIDTH),
           frameHeight(DEFAULT_PREVIEW_HEIGHT),
-          // YUYV / YUY2
+        // YUYV / YUY2
           frameBytes(DEFAULT_PREVIEW_WIDTH * DEFAULT_PREVIEW_HEIGHT * 2),
           frameMode(0),
 
-          //Add by Hsj
+        //Add by Hsj
           previewRotate(ROTATE_0),
           previewFlip(FLIP_DEFAULT),
 
@@ -609,7 +609,8 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
                         if (mPreviewWindow) {
                             //Add by Hsj for rotate and flip
                             //frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, PREVIEW_PIXEL_BYTES);
-                            frame = draw_preview_one(frame, &mPreviewWindow, uvc_yuyv2argb,PREVIEW_PIXEL_BYTES);
+                            frame = draw_preview_one(frame, &mPreviewWindow, uvc_yuyv2argb,
+                                                     PREVIEW_PIXEL_BYTES);
                         }
                         addCaptureFrame(frame);
                     } else {
@@ -627,7 +628,8 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
                     if (mPreviewWindow) {
                         //Add by Hsj for rotate and flip
                         //frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx, PREVIEW_PIXEL_BYTES);
-                        frame = draw_preview_one(frame, &mPreviewWindow, uvc_yuyv2argb,PREVIEW_PIXEL_BYTES);
+                        frame = draw_preview_one(frame, &mPreviewWindow, uvc_yuyv2argb,
+                                                 PREVIEW_PIXEL_BYTES);
                     }
                     addCaptureFrame(frame);
                 }
@@ -704,10 +706,7 @@ int copyToSurface(uvc_frame_t *frame, ANativeWindow **window) {
             // use lower height
             const int h = frame->height < buffer.height ? frame->height : buffer.height;
             // transfer from frame data to the Surface
-            // copyFrame(src, dest, w, h, src_step, dest_step);
-            memcpy(dest, src, frame->data_bytes);
-
-
+            copyFrame(src, dest, w, h, src_step, dest_step);
             ANativeWindow_unlockAndPost(*window);
         } else {
             result = -1;
