@@ -97,4 +97,4 @@ Please compliance with the UVCCamera license
 ```
 
 [1]: https://github.com/saki4510t/UVCCamera
-[2]: https://github.com/shengjunhu/android_sample_uvccamera/raw/master/doc/apk/sample_usbcamera_v20092519_release.apk
+[2]: https://github.com/shengjunhu/android_sample_uvccamera/raw/master/doc/apk/sample_usbcamera_v21040619_release.apk
