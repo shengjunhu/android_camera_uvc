@@ -4,6 +4,6 @@
     <string name="start_preview">startPreview</string>
     <string name="stop_preview">stopPreview</string>
     <string name="destroy_camera">destroyCamera</string>
-    <string name="select_camera">Select Camera</string>
+    <string name="select_camera">Select Usb Camera</string>
     <string name="btn_confirm">Confirm</string>
 </resources>

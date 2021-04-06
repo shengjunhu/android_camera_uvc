@@ -20,6 +20,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,8 +42,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * @Author:hsj
- * @Date:2020-06-22 16:50
+ * @Author:Hsj
+ * @Date:2020-06-22
  * @Class:MainActivity
  * @Desc:Sample of UVCCamera
  */
@@ -61,8 +62,9 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     private static final int CAMERA_STOP = 4;
     private static final int CAMERA_DESTROY = 5;
 
-    private int index = 0;
+    private int index;
     private Context context;
+    private LinearLayout ll_action;
     private USBMonitor mUSBMonitor;
     private Handler cameraHandler;
     private HandlerThread cameraThread;
@@ -71,12 +73,14 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         SurfaceView sv = findViewById(R.id.sv);
+        sv.setZOrderOnTop(true);
+        sv.setZOrderMediaOverlay(true);
         sv.getHolder().addCallback(this);
-        context = getApplicationContext();
 
-        this.cameraThread = new HandlerThread("camera_uvc_thread");
+        this.ll_action = findViewById(R.id.ll_action);
+        this.context = getApplicationContext();
+        this.cameraThread = new HandlerThread("thread_uvc_camera");
         this.cameraThread.start();
         this.cameraHandler = new Handler(cameraThread.getLooper(), this);
 
@@ -85,113 +89,22 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
         }
     }
 
-    private boolean hasPermissions(String... permissions) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
-        if (permissions == null || permissions.length == 0) return true;
-        boolean allGranted = true;
-        for (String permission : permissions) {
-            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                allGranted = false;
-                ActivityCompat.requestPermissions(this, permissions, 0);
-            }
-        }
-        return allGranted;
-    }
-
-    private void createUsbMonitor() {
-        this.mUSBMonitor = new USBMonitor(context, dcl);
-        this.mUSBMonitor.register();
-        showSingleChoiceDialog(false);
-    }
-
-//==========================================Menu====================================================
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.item_camera) {
-            showSingleChoiceDialog(true);
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void showSingleChoiceDialog(boolean show) {
-        if (mUSBMonitor == null) return;
-        List<UsbDevice> deviceList = mUSBMonitor.getDeviceList();
-        if (deviceList.size() == 0) return;
-        //Open first UsbDevice by default
-        if (!show) {
-            mUSBMonitor.requestPermission(deviceList.get(index));
-            return;
-        }
-        String[] items = new String[deviceList.size()];
-        for (int i = 0; i < deviceList.size(); ++i) {
-            UsbDevice device = deviceList.get(i);
-            items[i] = device.getProductName() + " -> " + device.getDeviceName();
-        }
-        AlertDialog.Builder selectDialog = new AlertDialog.Builder(this);
-        selectDialog.setTitle(R.string.select_camera);
-        final int lastSelected = index;
-        selectDialog.setSingleChoiceItems(items, index, (dialog, which) -> {
-            index = which;
-        });
-        selectDialog.setPositiveButton(R.string.btn_confirm, (dialog, which) -> {
-            if (mUSBMonitor != null && lastSelected != index) {
-                cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
-                mUSBMonitor.requestPermission(deviceList.get(index));
-            }
-        });
-        selectDialog.show();
-    }
-
-//==========================================Button Click============================================
-
-    public void startPreview(View view) {
-        cameraHandler.obtainMessage(CAMERA_START).sendToTarget();
-    }
-
-    public void stopPreview(View view) {
-        cameraHandler.obtainMessage(CAMERA_STOP).sendToTarget();
-    }
-
-    public void destroyCamera(View view) {
-        cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
-    }
-
-//=========================================Activity=================================================
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (mUSBMonitor != null && !mUSBMonitor.isRegistered()) {
-            mUSBMonitor.register();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mUSBMonitor != null && mUSBMonitor.isRegistered()) {
-            mUSBMonitor.unregister();
-        }
-    }
-
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (mUSBMonitor != null) {
             mUSBMonitor.destroy();
             mUSBMonitor = null;
         }
         if (cameraThread != null) {
-            cameraThread.quitSafely();
+            try {
+                cameraThread.join(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             cameraThread = null;
         }
+        super.onDestroy();
+        Log.d(TAG, "activity destroy");
     }
 
     @Override
@@ -208,10 +121,99 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
         }
     }
 
+    private void createUsbMonitor() {
+        this.mUSBMonitor = new USBMonitor(context, dcl);
+        this.mUSBMonitor.register();
+    }
+
+    private void showToast(@NonNull String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean hasPermissions(String... permissions) {
+        if (permissions == null || permissions.length == 0) return true;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
+        boolean allGranted = true;
+        for (String permission : permissions) {
+            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                allGranted = false;
+                ActivityCompat.requestPermissions(this, permissions, 0);
+            }
+        }
+        return allGranted;
+    }
+
+//==========================================Menu====================================================
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.item_camera) {
+            showSingleChoiceDialog();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showSingleChoiceDialog() {
+        if (this.mUSBMonitor == null) {
+            showToast("Wait USBMonitor created success");
+        } else {
+            List<UsbDevice> deviceList = mUSBMonitor.getDeviceList();
+            if (deviceList.size() == 0) {
+                showToast("No Usb Camera to be found");
+            } else {
+                //Close Usb Camera
+                this.ll_action.setVisibility(View.GONE);
+                this.cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
+                String[] items = new String[deviceList.size()];
+                for (int i = 0; i < deviceList.size(); ++i) {
+                    UsbDevice device = deviceList.get(i);
+                    items[i] = device.getProductName();
+                }
+                AlertDialog.Builder selectDialog = new AlertDialog.Builder(this);
+                selectDialog.setTitle(R.string.select_camera);
+                selectDialog.setSingleChoiceItems(items, index, (dialog, which) -> {
+                    index = which;
+                });
+                selectDialog.setPositiveButton(R.string.btn_confirm, (dialog, which) -> {
+                    this.ll_action.setVisibility(View.VISIBLE);
+                    UsbDevice device = deviceList.get(index);
+                    if (this.mUSBMonitor.hasPermission(device)){
+                        USBMonitor.UsbControlBlock ctrlBlock = this.mUSBMonitor.openDevice(device);
+                        this.cameraHandler.obtainMessage(CAMERA_CREATE, ctrlBlock).sendToTarget();
+                    }else {
+                        this.mUSBMonitor.requestPermission(device);
+                    }
+                });
+                selectDialog.show();
+            }
+        }
+    }
+
+//==========================================Button Click============================================
+
+    public void startPreview(View view) {
+        cameraHandler.obtainMessage(CAMERA_START).sendToTarget();
+    }
+
+    public void stopPreview(View view) {
+        cameraHandler.obtainMessage(CAMERA_STOP).sendToTarget();
+    }
+
+    public void destroyCamera(View view) {
+        cameraHandler.obtainMessage(CAMERA_DESTROY).sendToTarget();
+    }
+
 //===================================Surface========================================================
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        Log.d(TAG, "->surfaceCreated");
         cameraHandler.obtainMessage(CAMERA_PREVIEW, holder.getSurface()).sendToTarget();
     }
 
@@ -222,7 +224,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.e(TAG, "->surfaceDestroyed");
+        Log.d(TAG, "->surfaceDestroyed");
         cameraHandler.obtainMessage(CAMERA_DESTROY, holder.getSurface()).sendToTarget();
     }
 
@@ -290,7 +292,9 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
         long t = System.currentTimeMillis();
         if (camera != null) {
             destroyCamera();
+            camera = null;
         }
+        Log.i(TAG, "camera create start");
         try {
             camera = new UVCCamera();
             camera.open(block);
@@ -303,6 +307,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             e.printStackTrace();
             camera.destroy();
             camera = null;
+            return;
         }
         Log.i(TAG, "camera create time=" + (System.currentTimeMillis() - t));
         if (surface != null) {
@@ -343,36 +348,40 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     }
 
     private void startCamera() {
-        long t = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         if (!isStart && camera != null) {
             isStart = true;
             if (surface != null) {
+                //Call this method when you need show preview
                 Log.i(TAG, "setPreviewDisplay()");
                 camera.setPreviewDisplay(surface);
             }
-            //camera.setFrameCallback(frame -> {}, UVCCamera.PIXEL_FORMAT_NV21);
+            //TODO Camera frame callback
+            /*camera.setFrameCallback(frame -> {
+                Log.d(TAG,"frameSize="+frame.capacity());
+            }, UVCCamera.PIXEL_FORMAT_RAW);*/
             camera.startPreview();
         }
-        Log.i(TAG, "camera start time=" + (System.currentTimeMillis() - t));
+        Log.i(TAG, "camera start time=" + (System.currentTimeMillis() - start));
     }
 
     private void stopCamera() {
-        long t = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         if (isStart && camera != null) {
             isStart = false;
             camera.stopPreview();
         }
-        Log.i(TAG, "camera stop time=" + (System.currentTimeMillis() - t));
+        Log.i(TAG, "camera stop time=" + (System.currentTimeMillis() - start));
     }
 
     private void destroyCamera() {
-        long t = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         stopCamera();
         if (camera != null) {
             camera.destroy();
             camera = null;
         }
-        Log.i(TAG, "camera destroy time=" + (System.currentTimeMillis() - t));
+        Log.i(TAG, "camera destroy time=" + (System.currentTimeMillis() - start));
     }
 
 }

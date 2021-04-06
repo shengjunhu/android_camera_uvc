@@ -13,13 +13,15 @@
         android:layout_marginTop="5dp" />
 
     <LinearLayout
+        android:id="@+id/ll_action"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="20dp"
         android:orientation="horizontal"
+        android:visibility="gone"
         android:weightSum="3">
 
         <Button

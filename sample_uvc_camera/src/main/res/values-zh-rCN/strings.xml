@@ -4,6 +4,6 @@
     <string name="start_preview">startPreview</string>
     <string name="stop_preview">stopPreview</string>
     <string name="destroy_camera">destroyCamera</string>
-    <string name="select_camera">选择Camera</string>
+    <string name="select_camera">选择UsbCamera</string>
     <string name="btn_confirm">确定</string>
 </resources>

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <usb>
 
-    <usb-device class="14" />
+    <usb-device
+        class="14" />
 
     <usb-device
         product-id="12290"

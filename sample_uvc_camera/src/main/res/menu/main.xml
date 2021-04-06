@@ -9,7 +9,6 @@
         android:icon="@android:drawable/ic_menu_camera"
         android:orderInCategory="0"
         android:title="@string/action_camera"
-        app:showAsAction="always"
-       />
+        app:showAsAction="always" />
 
 </menu>
