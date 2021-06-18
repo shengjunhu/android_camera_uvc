@@ -82,13 +82,13 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
 
 ### About Build
 * NDK: ndk-r14b
-* CMake
+* AndroidStudio: 4.0
 
 ### About Author:
-* Author: shengjunhu
-* Date  : 2020/5/1
-* E-Mail: shengjunhu@foxmail.com
-* GitHub: https://github.com/hushengjun
+- Author: shengjunhu
+- Date  : 2020/05/01
+- E-Mail: shengjunhu@foxmail.com
+- GitHub: https://github.com/hushengjun
 
 ### About License
 ```
@@ -97,4 +97,4 @@ Please compliance with the UVCCamera license
 ```
 
 [1]: https://github.com/saki4510t/UVCCamera
-[2]: https://github.com/shengjunhu/android_sample_uvccamera/raw/master/doc/apk/sample_usbcamera_v21040619_release.apk
+[2]: https://github.com/shengjunhu/android_sample_uvccamera/raw/master/doc/apk/UVCCamera_v21061815.apk

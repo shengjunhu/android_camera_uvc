@@ -29,17 +29,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    lintOptions {
-        abortOnError false
-        checkReleaseBuilds false
-        warning 'InvalidPackage'
-        disable 'GoogleAppIndexingWarning'
-    }
-
-    dexOptions {
-        javaMaxHeapSize "4g"
-    }
-
     externalNativeBuild {
         ndkBuild {
             path file('src/main/jni/Android.mk')

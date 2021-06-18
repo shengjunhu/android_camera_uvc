@@ -16,10 +16,10 @@ android {
 
     signingConfigs {
         config {
-            keyAlias 'UsbCamera'
-            keyPassword 'UsbCamera'
+            keyAlias 'UVCCamera'
+            keyPassword 'UVCCamera'
             storeFile file('android.jks')
-            storePassword 'UsbCamera'
+            storePassword 'UVCCamera'
         }
     }
 
@@ -58,7 +58,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = "UsbCamera_v${variant.versionCode}.apk"
+            outputFileName = "UVCCamera_v${variant.versionCode}.apk"
         }
     }
 
