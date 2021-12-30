@@ -88,7 +88,7 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
 - Author: shengjunhu
 - Date  : 2020/05/01
 - E-Mail: shengjunhu@foxmail.com
-- GitHub: https://github.com/hushengjun
+- GitHub: https://github.com/shengjunhu
 
 ### About License
 ```
