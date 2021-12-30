@@ -35,17 +35,20 @@ import com.hsj.camera.Size;
 import com.hsj.camera.USBMonitor;
 import com.hsj.camera.UVCCamera;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.List;
 
 /**
  * @Author:Hsj
  * @Date:2020-06-22
  * @Class:MainActivity
- * @Desc:Sample of UVCCamera
+ * @Desc: Sample of UVCCamera
  */
 public final class MainActivity extends AppCompatActivity implements Handler.Callback, SurfaceHolder.Callback {
 
@@ -53,8 +56,8 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     //TODO Set your usb camera productId
     private static final int PRODUCT_ID = 12384;
     //TODO Set your usb camera display width and height
-    private static int PREVIEW_WIDTH = 1280;
-    private static int PREVIEW_HEIGHT = 720;
+    private static int PREVIEW_WIDTH = 640;
+    private static int PREVIEW_HEIGHT = 480;
 
     private static final int CAMERA_CREATE = 1;
     private static final int CAMERA_PREVIEW = 2;
@@ -233,28 +236,28 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     private final USBMonitor.OnDeviceConnectListener dcl = new USBMonitor.OnDeviceConnectListener() {
         @Override
         public void onAttach(UsbDevice device) {
-            Log.i(TAG, "Usb->onAttach->" + device.getProductId());
+            Log.d(TAG, "Usb->onAttach->" + device.getProductId());
         }
 
         @Override
         public void onConnect(UsbDevice device, USBMonitor.UsbControlBlock ctrlBlock, boolean createNew) {
-            Log.i(TAG, "Usb->onConnect->" + device.getProductId());
+            Log.d(TAG, "Usb->onConnect->" + device.getProductId());
             cameraHandler.obtainMessage(CAMERA_CREATE, ctrlBlock).sendToTarget();
         }
 
         @Override
         public void onDisconnect(UsbDevice device, USBMonitor.UsbControlBlock ctrlBlock) {
-            Log.i(TAG, "Usb->onDisconnect->" + device.getProductId());
+            Log.d(TAG, "Usb->onDisconnect->" + device.getProductId());
         }
 
         @Override
         public void onCancel(UsbDevice device) {
-            Log.i(TAG, "Usb->onCancel->" + device.getProductId());
+            Log.d(TAG, "Usb->onCancel->" + device.getProductId());
         }
 
         @Override
         public void onDetach(UsbDevice device) {
-            Log.i(TAG, "Usb->onDetach->" + device.getProductId());
+            Log.d(TAG, "Usb->onDetach->" + device.getProductId());
         }
     };
 
@@ -294,7 +297,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             destroyCamera();
             camera = null;
         }
-        Log.i(TAG, "camera create start");
+        Log.d(TAG, "camera create start");
         try {
             camera = new UVCCamera();
             camera.open(block);
@@ -309,7 +312,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             camera = null;
             return;
         }
-        Log.i(TAG, "camera create time=" + (System.currentTimeMillis() - t));
+        Log.d(TAG, "camera create time=" + (System.currentTimeMillis() - t));
         if (surface != null) {
             startCamera();
         }
@@ -320,7 +323,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
         //Most UsbCamera support 640x480
         //A few UsbCamera may fail to obtain the supported resolution
         if (sizes == null || sizes.size() == 0) return;
-        Log.i(TAG, mCamera.getSupportedSize());
+        Log.d(TAG, mCamera.getSupportedSize());
         boolean isSupport = false;
         for (Size size : sizes) {
             if (size.width == PREVIEW_WIDTH && size.height == PREVIEW_HEIGHT) {
@@ -334,7 +337,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             PREVIEW_WIDTH = size.width;
             PREVIEW_HEIGHT = size.height;
         }
-        Log.i(TAG, String.format("SupportSize->with=%d,height=%d", PREVIEW_WIDTH, PREVIEW_HEIGHT));
+        Log.d(TAG, String.format("SupportSize->with=%d,height=%d", PREVIEW_WIDTH, PREVIEW_HEIGHT));
     }
 
     private void setSurface(Surface surface) {
@@ -353,16 +356,17 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             isStart = true;
             if (surface != null) {
                 //Call this method when you need show preview
-                Log.i(TAG, "setPreviewDisplay()");
+                Log.d(TAG, "setPreviewDisplay()");
                 camera.setPreviewDisplay(surface);
             }
             //TODO Camera frame callback
-            /*camera.setFrameCallback(frame -> {
+            camera.setFrameCallback(frame -> {
                 Log.d(TAG,"frameSize="+frame.capacity());
-            }, UVCCamera.PIXEL_FORMAT_RAW);*/
+                //saveFile("/sdcard/640x400.NV21",frame);
+            }, UVCCamera.PIXEL_FORMAT_NV21);
             camera.startPreview();
         }
-        Log.i(TAG, "camera start time=" + (System.currentTimeMillis() - start));
+        Log.d(TAG, "camera start time=" + (System.currentTimeMillis() - start));
     }
 
     private void stopCamera() {
@@ -371,7 +375,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             isStart = false;
             camera.stopPreview();
         }
-        Log.i(TAG, "camera stop time=" + (System.currentTimeMillis() - start));
+        Log.d(TAG, "camera stop time=" + (System.currentTimeMillis() - start));
     }
 
     private void destroyCamera() {
@@ -381,9 +385,34 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             camera.destroy();
             camera = null;
         }
-        Log.i(TAG, "camera destroy time=" + (System.currentTimeMillis() - start));
+        Log.d(TAG, "camera destroy time=" + (System.currentTimeMillis() - start));
     }
 
+
+    public static boolean saveFile(String dstFile, ByteBuffer data) {
+        boolean result = true;
+        FileChannel fc = null;
+        try {
+            fc = new FileOutputStream(dstFile).getChannel();
+            fc.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+            result = false;
+        } finally {
+            ioClose(fc);
+        }
+        return result;
+    }
+
+    private static void ioClose(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 
 

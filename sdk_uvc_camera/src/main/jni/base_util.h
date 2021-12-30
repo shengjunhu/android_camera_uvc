@@ -43,6 +43,7 @@ enum ROTATE {
     ROTATE_180 = 180,
     ROTATE_270 = 270
 };
+
 //Add by Hsj For preview flip
 enum FLIP {
     FLIP_H = 1,
