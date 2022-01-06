@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">sample_uvc_camera</string>
-    <string name="action_camera">UsbCamera</string>
+    <string name="app_name">UVCCamera</string>
+    <string name="action_camera">UVCCamera</string>
     <string name="start_preview">startPreview</string>
     <string name="stop_preview">stopPreview</string>
     <string name="destroy_camera">destroyCamera</string>

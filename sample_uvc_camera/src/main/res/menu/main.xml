@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.hsj.sample.uvc.MainActivity">
+    tools:context="com.hsj.sample.uvc.com.hsj.camera.sample.MainActivity">
 
     <item
         android:id="@+id/item_camera"

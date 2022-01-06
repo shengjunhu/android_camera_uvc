@@ -16,10 +16,10 @@ android {
 
     signingConfigs {
         config {
-            keyAlias 'UVCCamera'
-            keyPassword 'UVCCamera'
+            keyAlias 'android'
+            keyPassword 'android'
             storeFile file('android.jks')
-            storePassword 'UVCCamera'
+            storePassword 'android'
         }
     }
 
