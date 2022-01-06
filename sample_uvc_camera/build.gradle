@@ -81,7 +81,7 @@ dependencies {
     implementation rootProject.ext.dependencies.appcompat
     implementation rootProject.ext.dependencies.annotations
 
-    //内存泄漏监控
+    //LeakCanary
     //debugImplementation rootProject.ext.dependencies.leak_canary
 
     //UVCCamera

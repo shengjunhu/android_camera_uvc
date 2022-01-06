@@ -8,7 +8,7 @@
         android:id="@+id/item_camera"
         android:icon="@android:drawable/ic_menu_camera"
         android:orderInCategory="0"
-        android:title="@string/action_camera"
+        android:title="@string/app_name"
         app:showAsAction="always" />
 
 </menu>
