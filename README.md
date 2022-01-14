@@ -1,6 +1,6 @@
 # android_uvc_camera
 🔥 UVC Camera on Android,
-developed based on the [saki4510t/UVCCamera][1]
+developed based on the [saki4510t/UVCCamera][2]
 
 ### Image
 <img src="doc/img/screenshot_1.png" width="200px"/> <img src="doc/img/screenshot_2.png" width="200px"/> <img src="doc/img/screenshot_3.png" width="200px"/>
@@ -8,7 +8,7 @@ developed based on the [saki4510t/UVCCamera][1]
 ### Sample
 | <img src="doc/img/qr_apk.png" width="260px" /> |
 | :--------:                      |
-| Scan QR code or [Download][2]   |
+| Scan QR code or [Download][1]   |
 
 ### Add Function
 
@@ -90,11 +90,23 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
 - E-Mail: shengjunhu@foxmail.com
 - GitHub: https://github.com/shengjunhu
 
+### About Third Party Libraries
+- [saki4510t/UVCCamera][2]
+- [libjpeg-turbo][3]
+- [libyuv][4]
+- [libusb][5]
+- [libuvc][6]
+
 ### About License
 ```
 Copyright (c) 2020 shengjunhu
 Please comply with the relevant third party libraries license
 ```
 
-[1]: https://github.com/saki4510t/UVCCamera
-[2]: https://github.com/shengjunhu/android_uvc_camera/raw/master/doc/apk/android_uvc_camera.apk
+[1]: https://github.com/shengjunhu/android_uvc_camera/raw/master/doc/apk/android_uvc_camera.apk
+[2]: https://github.com/saki4510t/UVCCamera
+[3]: https://github.com/libjpeg-turbo/libjpeg-turbo
+[4]: https://chromium.googlesource.com/external/libyuv
+[5]: https://github.com/libusb/libusb
+[6]: https://github.com/libuvc/libuvc
+
