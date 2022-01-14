@@ -93,7 +93,7 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
 ### About License
 ```
 Copyright (c) 2020 shengjunhu
-Please compliance with the UVCCamera license
+Please comply with the relevant third party libraries license
 ```
 
 [1]: https://github.com/saki4510t/UVCCamera
