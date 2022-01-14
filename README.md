@@ -6,7 +6,7 @@ developed based on the [saki4510t/UVCCamera][1]
 <img src="doc/img/screenshot_1.png" width="200px"/> <img src="doc/img/screenshot_2.png" width="200px"/> <img src="doc/img/screenshot_3.png" width="200px"/>
 
 ### Sample
-| <img src="doc/img/android_logo.png" width="260px" /> |
+| <img src="doc/img/qr_apk.png" width="260px" /> |
 | :--------:                      |
 | Scan QR code or [Download][2]   |
 
@@ -97,4 +97,4 @@ Please compliance with the UVCCamera license
 ```
 
 [1]: https://github.com/saki4510t/UVCCamera
-[2]: https://github.com/shengjunhu/android_uvc_camera/raw/master/doc/apk/android_uvc_camera_v22010616.apk
+[2]: https://github.com/shengjunhu/android_uvc_camera/raw/master/doc/apk/android_uvc_camera.apk
