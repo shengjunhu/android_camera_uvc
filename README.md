@@ -1,5 +1,5 @@
-# android_sample_uvccamera
-android sample of uvccamera,
+# android_uvc_camera
+🔥 UVC Camera on Android,
 developed based on the [saki4510t/UVCCamera][1]
 
 ### Image
@@ -97,4 +97,4 @@ Please compliance with the UVCCamera license
 ```
 
 [1]: https://github.com/saki4510t/UVCCamera
-[2]: https://github.com/shengjunhu/android_sample_uvccamera/raw/master/doc/apk/UVCCamera_v22010616.apk
+[2]: https://github.com/shengjunhu/android_uvc_camera/raw/master/doc/apk/android_uvc_camera_v22010616.apk
