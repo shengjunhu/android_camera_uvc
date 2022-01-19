@@ -43,7 +43,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
     private static final String TAG = "MainActivity";
     //TODO Set your usb camera display width and height
     private static int PREVIEW_WIDTH = 640;
-    private static int PREVIEW_HEIGHT = 480;
+    private static int PREVIEW_HEIGHT = 400;
 
     private static final int CAMERA_CREATE = 1;
     private static final int CAMERA_PREVIEW = 2;
@@ -349,7 +349,7 @@ public final class MainActivity extends AppCompatActivity implements Handler.Cal
             camera.setFrameCallback(frame -> {
                 Log.d(TAG,"frameSize="+frame.capacity());
                 //saveFile("/sdcard/640x400.NV21",frame);
-            }, UVCCamera.PIXEL_FORMAT_NV21);
+            }, UVCCamera.PIXEL_FORMAT_RAW);
             camera.startPreview();
         }
         Log.d(TAG, "camera start time=" + (System.currentTimeMillis() - start));
