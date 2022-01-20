@@ -1,15 +1,9 @@
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := yuv
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_CFLAGS := -Wall -fexceptions
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
-LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
 
 LOCAL_CPP_EXTENSION := .cc
+
 LOCAL_SRC_FILES := \
 	source/compare.cc           \
     source/compare_common.cc    \
@@ -58,4 +52,13 @@ else ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
 
 endif
 
+LOCAL_CFLAGS := -Wall -fexceptions
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
+
+LOCAL_MODULE := libyuv
+LOCAL_MODULE_TAGS := optional
+
 include $(BUILD_SHARED_LIBRARY)
+#include $(BUILD_STATIC_LIBRARY)

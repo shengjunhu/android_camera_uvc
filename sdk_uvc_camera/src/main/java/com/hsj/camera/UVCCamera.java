@@ -2,17 +2,14 @@ package com.hsj.camera;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.graphics.SurfaceTexture;
 import android.hardware.usb.UsbDevice;
 import android.text.TextUtils;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-
 import com.hsj.camera.BuildConfig;
 
 public class UVCCamera {
